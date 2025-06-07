@@ -1,0 +1,72 @@
+﻿@model List<Employee>
+
+@{
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Employee Directory</h2>
+        <a class="btn btn-primary btn-sm" asp-controller="Employee" asp-action="Create">Add Employee</a>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a class="btn btn-primary btn-sm" asp-controller="Client" asp-action="Index">Go to Client List</a>
+    </div>
+    <table class="table table-sm table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th class="text-center">Profile</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Department</th>
+                <th>Email</th>
+                <th>Date of Joining</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in Model)
+            {
+                <tr>
+                    <td class="text-center">
+                        <img src="@(!string.IsNullOrEmpty(employee.Profilepic) ? employee.Profilepic : "/images/default_image.jpg")"
+                             alt="Profile Picture"
+                             class="rounded border" width="40" height="40">
+                    </td>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.LastName</td>
+                    <td>@employee.Department</td>
+                    <td>@employee.Email</td>
+                    <td>@employee.Dateofjoining.ToString("yyyy-MM-dd")</td>
+                    <td class="text-center">
+                        <a class="btn btn-warning btn-sm" asp-controller="Employee" asp-action="Edit" asp-route-id="@employee.Id">Edit</a>
+                        <a class="btn btn-danger btn-sm" asp-controller="Employee" asp-action="Delete" asp-route-id="@employee.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <nav class="d-flex justify-content-center mt-3">
+        <ul class="pagination pagination-sm">
+            @if (currentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="Employee" asp-action="Index" asp-route-page="@(currentPage - 1)">Previous</a>
+                </li>
+            }
+
+            <li class="page-item disabled">
+                <span class="page-link">Page @currentPage of @totalPages</span>
+            </li>
+
+            @if (currentPage < totalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="Employee" asp-action="Index" asp-route-page="@(currentPage + 1)">Next</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>

@@ -1,0 +1,65 @@
+﻿@model List<Client>
+@{
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+}
+
+<div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Client List </h2>
+        @* <a class="btn btn-primary btn-sm" asp-controller="Client" asp-action="Insert">Add Client</a> *@
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a class="btn btn-primary btn-sm" asp-controller="Employee" asp-action="Index">Go to Employee List</a>
+
+        <a class="btn btn-outline-info" asp-controller="Client" asp-action="GetTableClient">Details of the Clients </a>
+    </div>
+    <table class="table table-sm table-bordered">
+        <thead class="table-light">
+            <tr class="text-center">
+                <th>Client ID</th>
+                <th>Client Name</th>
+                <th>Role</th>
+                <th>Email</th>
+               
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in Model)
+            {
+                <tr class="text-center">
+                    <td>@client.Id</td>
+                    <td>@client.Name</td>
+                    <td>@client.Role</td>
+                    <td>@client.Email</td>
+                   <td class="text-center">
+                        <a class="btn btn-warning btn-sm" asp-controller="Client" asp-action="Edit" asp-route-id="@client.Id">Edit</a>
+                      
+                        <a class="btn btn-danger btn-sm" asp-controller="Client" asp-action="Delete" asp-route-id="@client.Id">Delete</a>
+                      
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <nav class="d-flex justify-content-center mt-3">
+        <ul class="pagination pagination-sm">
+            @if (currentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="Client" asp-action="Index" asp-route-page="@(currentPage - 1)">Previous</a>
+                </li>
+            }
+            <li class="page-item disabled">
+                <span class="page-link">Page @currentPage of @totalPages</span>
+            </li>
+            @if (currentPage < totalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="Client" asp-action="Index" asp-route-page="@(currentPage + 1)">Next</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>

@@ -1,0 +1,23 @@
+﻿@model Employee
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4 text-danger">Confirm Deletion</h2>
+
+    <div class="border p-3 rounded text-center">
+        <p>Are you sure you want to delete <strong>@Model.FirstName @Model.LastName</strong>?</p>
+
+        <img src="@(!string.IsNullOrEmpty(Model.Profilepic) ? Model.Profilepic : "/images/default_image.jpg")"
+             alt="Profile Picture"
+             class="rounded border mt-2" width="100" height="100">
+
+        <form asp-controller="Employee" asp-action="DeleteConfirmed" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex justify-content-center mt-3">
+                <a class="btn btn-secondary me-2" asp-controller="Employee" asp-action="Index">Cancel</a>
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
+        </form>
+    </div>
+
+   
+</div>

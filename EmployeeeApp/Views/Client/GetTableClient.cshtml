@@ -1,0 +1,45 @@
+﻿@model List<ClientViewID>
+
+@{
+    ViewData["Title"] = "Client List With Details";
+}
+<h2 class="mb-0">Client List </h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+   
+    <a class="btn btn-outline-warning" asp-controller="Client" asp-action="Index">Back To Client List</a>
+    <a class="btn btn-primary mb-3" asp-action="InsertAll">Add New Client Order</a>
+</div>
+
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Role</th>
+            <th scope="col">OrderID</th>
+            <th scope="col">Address</th>
+            <th scope="col">Email</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <th scope="row">@c.Id</th>
+                <td>@c.Name</td>
+                <td>@c.Role</td>
+                <td>@c.OrderId</td>
+                <td>@c.Address</td>
+                <td>@c.Email</td>
+                <td>
+                    <a class="btn btn-success" asp-action="EditLIst" asp-route-id="@c.Id" asp-route-OrderID="@c.OrderId" >Edit</a>
+                    <a class="btn btn-danger" asp-action="DeleteFromList" asp-route-id="@c.Id" asp-route-OrderID="@c.OrderId">Delete</a>
+                </td>
+                <th>   <a class="btn btn-default" asp-action="AddLIst" asp-route-id="@c.Id" asp-route-OrderID="@c.OrderId">Add</a>  </th>
+            </tr>
+        }
+    </tbody>
+</table>
+

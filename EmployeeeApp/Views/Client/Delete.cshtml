@@ -1,0 +1,16 @@
+﻿@model Client
+<div>
+    <h2 class="text-center mb-4">Delete Client</h2>
+    <div class="alert alert-danger text-center">
+        <strong>Warning!</strong> Are you sure you want to delete this client?
+    </div>
+    <div class="text-center">
+        <a class="btn btn-secondary" asp-controller="Client" asp-action="Index">Cancel</a>
+        <form asp-controller="Client" asp-action="Delete" method="post" class="d-inline-block">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+    
+
+</div>   
