@@ -1,4 +1,4 @@
-﻿@model Client
+﻿@model EditId
 
 
 
@@ -30,8 +30,54 @@
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
         
+
+        @if (Model.list != null && Model.list.Count > 0)
+        {
+            <div class="mt-4">
+                <h3>Client Orders</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.list)
+                        {
+                            <tr>
+                                <td>@order.OrderId</td>
+                                <td>@order.Address</td>
+                                <td>
+                                    <a class="btn btn-success" asp-action="EditLIst" asp-route-id="@Model.Id" asp-route-OrderID="@order.OrderId">Edit</a>
+                                    <a class="btn btn-danger" asp-action="DeleteFromList" asp-route-id="@Model.Id" asp-route-OrderID="@order.OrderId">Delete</a>
+                                    <a class="btn btn-outline-primary" asp-action="AddLIst" asp-route-id="@Model.Id" asp-route-OrderID="@order.OrderId">Add Address</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">No orders found for this client.</div>
+        }
+
+
+
+
         <div class="d-flex justify-content-between">
             <a class="btn btn-secondary" asp-controller="Client" asp-action="Index">Cancel</a>
             <button type="submit" class="btn btn-primary">Save Client</button>
         </div>
+
+       
+
+
+
     </form>
+
+     
+    </div>
+

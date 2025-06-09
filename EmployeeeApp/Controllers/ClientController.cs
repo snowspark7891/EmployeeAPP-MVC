@@ -53,7 +53,7 @@ namespace EmployeeeApp.Controllers
         [HttpGet]
         public IActionResult Edit(int Id)
         {
-            Client viewClientModel = _clientData.GetById(Id);
+            EditId viewClientModel = _clientData.GetById(Id);
 
             if (viewClientModel == null)
             {
@@ -62,28 +62,28 @@ namespace EmployeeeApp.Controllers
             return View(viewClientModel);
         }
 
-        [HttpPost]
-        public IActionResult Edit(Client client)
-        {
-            if (ModelState.IsValid)
-            {
-                if (_clientData.Update(client))
-                {
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Failed to update client. Please try again.");
-                }
-            }
-            return View("Edit", client);
-        }
+        //[HttpPost]
+        //public IActionResult Edit(Client client)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        if (_clientData.Update(client))
+        //        {
+        //            return RedirectToAction("Index");
+        //        }
+        //        else
+        //        {
+        //            ModelState.AddModelError("", "Failed to update client. Please try again.");
+        //        }
+        //    }
+        //    return View("Edit", client);
+        //}
 
 
         [HttpGet]
         public IActionResult Delete(int Id)
         {
-            Client client = _clientData.GetById(Id);
+            EditId client = _clientData.GetById(Id);
             if (client == null)
             {
                 return NotFound();
@@ -119,7 +119,7 @@ namespace EmployeeeApp.Controllers
             {
                 if (_clientData.InsertAll(b))
                 {
-                    return RedirectToAction("GetTableClient");
+                    return RedirectToAction("Index");
                 }
                 else
                 {
@@ -148,16 +148,20 @@ namespace EmployeeeApp.Controllers
             return View(client);
         }
 
+
         [HttpPost]
-        public IActionResult UpdateAll(ClientViewID client)
+        public IActionResult UpdateAll(ClientViewID client,int id)
         {
             if (_clientData.UpdateAlll(client))
             {
+                int Id = client.Id;
               
-                return RedirectToAction("GetTableClient");
+                return RedirectToAction("Edit",Id);
             }
             return View("EditLIst", client);
         }
+
+
 
         [HttpGet]
         public IActionResult DeleteFromList(int Id,int OrderId)
@@ -170,26 +174,35 @@ namespace EmployeeeApp.Controllers
             return NotFound();
         }
 
+
+
         [HttpPost]
-        public IActionResult DeleteFromList(int OrderId)
+        public IActionResult DeleteFromListAct(int OrderId,int Id)
         {
             if (_clientData.DeleteFromList(OrderId))
             {
-                return RedirectToAction("GetTableClient");
+                return RedirectToAction($"Edit/{Id}");
             }
             return NotFound();
         }
+
+
+
         public IActionResult AddLIst(int Id, int OrderId)
         {
             ClientViewID li = _clientData.GetViewBYID(Id,OrderId);
             return View(li);
         }
+
+
+
         [HttpPost]
         public IActionResult AddLIst(ClientViewID li)
         {
+            int Id = li.Id;
             if (_clientData.AddADDRL(li))
             {
-                return RedirectToAction("GetTableClient");
+                return RedirectToAction($"Edit/{Id}");
             }
             else
             {
