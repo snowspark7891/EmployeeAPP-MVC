@@ -50,7 +50,7 @@ namespace EmployeeeApp.Controllers
             return View(client);
         }
 
-        [HttpGet]
+        [HttpGet("Edit/{Id}")]
         public IActionResult Edit(int Id)
         {
             EditId viewClientModel = _clientData.GetById(Id);
@@ -181,7 +181,7 @@ namespace EmployeeeApp.Controllers
         {
             if (_clientData.DeleteFromList(OrderId))
             {
-                return RedirectToAction($"Edit/{Id}");
+                return RedirectToAction("Edit", new { Id = Id });
             }
             return NotFound();
         }
@@ -202,7 +202,7 @@ namespace EmployeeeApp.Controllers
             int Id = li.Id;
             if (_clientData.AddADDRL(li))
             {
-                return RedirectToAction($"Edit/{Id}");
+                return RedirectToAction("Edit",Id);
             }
             else
             {
