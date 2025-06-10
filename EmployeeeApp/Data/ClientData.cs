@@ -321,36 +321,7 @@ namespace EmployeeeApp.Data
             }
         }
 
-        //public bool UpdateAddress(ClientViewID clientr)
-        //{
-        //    try
-        //    {
-        //        using (SqlConnection connection = new SqlConnection(_connectionString))
-        //        {
-        //            connection.Open();
-        //            foreach (var address in clientr.list)
-        //            {
-        //                using (SqlCommand command = new SqlCommand("Update ClientDetails set Address = @Address where Id = @OrderId and ClientId = @ClientId", connection))
-        //                {
-        //                    command.Parameters.AddWithValue("@OrderId", address.OrderId);
-        //                    command.Parameters.AddWithValue("@ClientId", clientr.Id);
-        //                    command.Parameters.AddWithValue("@Address", address.Address);
-        //                    int rowwaffected = (int)command.ExecuteNonQuery();
-        //                    if (rowwaffected <= 0)
-        //                    {
-        //                        return false;
-        //                    }
-        //                }
-        //            }
-        //            return true;
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new Exception("Error Can't Update Address : " + e.Message);
-        //    }
-        //}
-
+        
 
         public ClientDetails EditDetails(int Id, int OrderId)
         {
