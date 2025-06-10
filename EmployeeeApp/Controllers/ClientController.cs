@@ -28,83 +28,29 @@ namespace EmployeeeApp.Controllers
             return View(clients);
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult Create(Client client)
-        {
-            if (ModelState.IsValid)
-            {
-                if (_clientData.Insert(client))
-                {
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Failed to create client. Please try again.");
-                }
-            }
-            return View(client);
-        }
-
-        [HttpGet("Edit/{Id}")]
-        public IActionResult Edit(int Id)
-        {
-            EditId viewClientModel = _clientData.GetById(Id);
-
-            if (viewClientModel == null)
-            {
-                return NotFound();
-            }
-            return View(viewClientModel);
-        }
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
 
         //[HttpPost]
-        //public IActionResult Edit(Client client)
+        //public IActionResult Create(Client client)
         //{
         //    if (ModelState.IsValid)
         //    {
-        //        if (_clientData.Update(client))
+        //        if (_clientData.Insert(client))
         //        {
         //            return RedirectToAction("Index");
         //        }
         //        else
         //        {
-        //            ModelState.AddModelError("", "Failed to update client. Please try again.");
+        //            ModelState.AddModelError("", "Failed to create client. Please try again.");
         //        }
         //    }
-        //    return View("Edit", client);
+        //    return View(client);
         //}
 
 
-        [HttpGet]
-        public IActionResult Delete(int Id)
-        {
-            EditId client = _clientData.GetById(Id);
-            if (client == null)
-            {
-                return NotFound();
-            }
-            return View(client);
-        }
-
-
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int Id)
-        {
-            if (_clientData.Delete(Id))
-            {
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                ModelState.AddModelError("", "Failed to delete client. Please try again.");
-                return View();
-            }
-        }
 
 
         public IActionResult InsertAll()
@@ -129,18 +75,73 @@ namespace EmployeeeApp.Controllers
             return View("Single", b);
         }
 
+
+
+        //main client oprations
+
         [HttpGet]
-        public IActionResult GetTableClient()
+        public IActionResult EditPage(int Id)
         {
-            List<ClientViewID> client = _clientData.GettNewView();
-
+            ClientViewID client = _clientData.GetViewBYId(Id);
+            if (client == null)
+            {
+                return NotFound();
+            }
             return View(client);
-        } 
+        }
 
-        public IActionResult EditLIst(int Id,int OrderID)
+        [HttpPost]
+        public IActionResult EditClient(ClientViewID client)
         {
-            ClientViewID client = _clientData.GetViewBYID(Id , OrderID);
-            if(client == null)
+
+            Client client1 = new Client
+            {
+                Id = client.Id,
+                Name = client.Name,
+                Role = client.Role,
+                Email = client.Email
+            };
+            if (_clientData.UpdateClient(client1))
+            {
+                return RedirectToAction("Index");
+            }
+            ClientViewID cli = _clientData.GetViewBYId(client.Id);
+            return View("EditPage", cli);
+
+        }
+
+        [HttpGet]
+        public IActionResult DeletePage(int Id)
+        {
+            ClientViewID client = _clientData.GetViewBYId(Id);
+            if (client == null)
+            {
+                return NotFound();
+            }
+            return View(client);
+        }
+
+        [HttpPost]
+        public IActionResult DeleteClient(int Id)
+        {
+            if (_clientData.DeleteClient(Id))
+            {
+                return RedirectToAction("Index");
+            }
+            ClientViewID cli = _clientData.GetViewBYId(Id);
+            return View("DeletePage", cli);
+        }
+
+
+        //address table operations
+
+        [HttpGet]
+        public IActionResult EditLIst(int Id, int OrderID)
+        {
+            ClientDetails client = _clientData.EditDetails(Id, OrderID);
+
+
+            if (client == null)
             {
                 return NotFound();
             }
@@ -148,61 +149,67 @@ namespace EmployeeeApp.Controllers
             return View(client);
         }
 
-
         [HttpPost]
-        public IActionResult UpdateAll(ClientViewID client,int id)
+        public IActionResult EditLIst(ClientDetails client)
         {
-            if (_clientData.UpdateAlll(client))
+            if (_clientData.AddAddress(client))
             {
-                int Id = client.Id;
-              
-                return RedirectToAction("Edit",Id);
+                int Id = client.ClientId;
+                ClientViewID cli = _clientData.GetViewBYId(Id);
+                return View("EditPage", cli);
             }
-            return View("EditLIst", client);
+            return View("EditList", client);
+
         }
+
+        [HttpGet]
+        public IActionResult DeleteList(int Id, int OrderId)
+        {
+            ClientDetails client = _clientData.EditDetails(Id, OrderId);
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            return View(client);
+        }
+        [HttpPost]
+        public IActionResult DeleteList(ClientDetails client)
+        {
+            int Id = client.ClientId;
+            int OrderId = client.OrderId;
+            if (_clientData.DeleteAddress(Id, OrderId))
+            {
+
+                ClientViewID cli = _clientData.GetViewBYId(Id);
+                return View("EditPage", cli);
+            }
+            return View("DeleteList", client);
+        }
+
 
 
 
         [HttpGet]
-        public IActionResult DeleteFromList(int Id,int OrderId)
+        public IActionResult AddAddressList(int Id)
         {
-            ClientViewID df = _clientData.GetViewBYID(Id, OrderId);
-            if (df != null)
+            ClientDetails client = new ClientDetails
             {
-                return View(df);
+                ClientId = Id
+            };
+            if (client == null)
+            {
+                return NotFound();
             }
-            return NotFound();
+            return View(client);
         }
-
-
-
         [HttpPost]
-        public IActionResult DeleteFromListAct(int OrderId,int Id)
+        public IActionResult AddAddresslist(int Id, string Address)
         {
-            if (_clientData.DeleteFromList(OrderId))
+            if (_clientData.AddAddress(Id, Address))
             {
-                return RedirectToAction("Edit", new { Id = Id });
-            }
-            return NotFound();
-        }
-
-
-
-        public IActionResult AddLIst(int Id, int OrderId)
-        {
-            ClientViewID li = _clientData.GetViewBYID(Id,OrderId);
-            return View(li);
-        }
-
-
-
-        [HttpPost]
-        public IActionResult AddLIst(ClientViewID li)
-        {
-            int Id = li.Id;
-            if (_clientData.AddADDRL(li))
-            {
-                return RedirectToAction("Edit",Id);
+                ClientViewID cli = _clientData.GetViewBYId(Id);
+                return View("EditPage", cli);
             }
             else
             {
@@ -217,7 +224,62 @@ namespace EmployeeeApp.Controllers
 
 
 
-//public IActionResult Single()
+
+//[HttpGet("Edit/{Id}")]
+//public IActionResult Edit(int Id)
+//{
+//    EditId viewClientModel = _clientData.GetById(Id);
+
+//    if (viewClientModel == null)
+//    {
+//        return NotFound();
+//    }
+//    return View(viewClientModel);
+//}
+
+//[HttpPost]
+//public IActionResult Edit(Client client)
+//{
+//    if (ModelState.IsValid)
+//    {
+//        if (_clientData.Update(client))
+//        {
+//            return RedirectToAction("Index");
+//        }
+//        else
+//        {
+//            ModelState.AddModelError("", "Failed to update client. Please try again.");
+//        }
+//    }
+//    return View("Edit", client);
+//}
+
+
+//[HttpGet]
+//public IActionResult Delete(int Id)
+//{
+//    EditId client = _clientData.GetById(Id);
+//    if (client == null)
+//    {
+//        return NotFound();
+//    }
+//    return View(client);
+//}
+
+
+//[HttpPost, ActionName("Delete")]
+//public IActionResult DeleteConfirmed(int Id)
+//{
+//    if (_clientData.Delete(Id))
+//    {
+//        return RedirectToAction("Index");
+//    }
+//    else
+//    {
+//        ModelState.AddModelError("", "Failed to delete client. Please try again.");
+//        return View();
+//    }
+//}//public IActionResult Single()
 //{
 //    var lin = new ViewModel
 //    {
@@ -233,7 +295,78 @@ namespace EmployeeeApp.Controllers
 
 
 
+//public IActionResult EditLIst(int Id,int OrderID)
+//{
+//    ClientViewID client = _clientData.GetViewBYID(Id , OrderID);
+//    if(client == null)
+//    {
+//        return NotFound();
+//    }
 
+//    return View(client);
+//}
+
+
+//[HttpPost]
+//public IActionResult UpdateAll(ClientViewID client,int id)
+//{
+//    if (_clientData.UpdateAlll(client))
+//    {
+//        int Id = client.Id;
+
+//        return RedirectToAction("Edit",Id);
+//    }
+//    return View("EditLIst", client);
+//}
+
+
+
+//[HttpGet]
+//public IActionResult DeleteFromList(int Id,int OrderId)
+//{
+//    ClientViewID df = _clientData.GetViewBYID(Id, OrderId);
+//    if (df != null)
+//    {
+//        return View(df);
+//    }
+//    return NotFound();
+//}
+
+
+
+//[HttpPost]
+//public IActionResult DeleteFromListAct(int OrderId,int Id)
+//{
+//    if (_clientData.DeleteFromList(OrderId))
+//    {
+//        return RedirectToAction("Edit", new { Id = Id });
+//    }
+//    return NotFound();
+//}
+
+
+
+//public IActionResult AddLIst(int Id, int OrderId)
+//{
+//    ClientViewID li = _clientData.GetViewBYID(Id,OrderId);
+//    return View(li);
+//}
+
+
+
+//[HttpPost]
+//public IActionResult AddLIst(ClientViewID li)
+//{
+//    int Id = li.Id;
+//    if (_clientData.AddADDRL(li))
+//    {
+//        return RedirectToAction("Edit",Id);
+//    }
+//    else
+//    {
+//        return NotFound();
+//    }
+//}
 
 
 

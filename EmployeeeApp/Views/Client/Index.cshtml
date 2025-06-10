@@ -12,12 +12,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <a class="btn btn-primary btn-sm" asp-controller="Employee" asp-action="Index">Go to Employee List</a>
 
-        <a class="btn btn-outline-info" asp-controller="Client" asp-action="GetTableClient">Details of the Clients </a>
+        <a class="btn btn-outline-info" asp-controller="Client" asp-action="InsertAll">Add Clients</a>
     </div>
     <table class="table table-sm table-bordered">
         <thead class="table-light">
             <tr class="text-center">
-                <th>Client ID</th>
+                @* <th>Client ID</th> *@
                 <th>Client Name</th>
                 <th>Role</th>
                 <th>Email</th>
@@ -29,14 +29,14 @@
             @foreach (var client in Model)
             {
                 <tr class="text-center">
-                    <td>@client.Id</td>
+                    @* <td>@client.Id</td> *@
                     <td>@client.Name</td>
                     <td>@client.Role</td>
                     <td>@client.Email</td>
                    <td class="text-center">
-                        <a class="btn btn-warning btn-sm" asp-controller="Client" asp-action="Edit" asp-route-id="@client.Id">Edit</a>
+                        <a class="btn btn-warning btn-sm" asp-controller="Client" asp-action="EditPage" asp-route-id="@client.Id">Edit</a>
                       
-                        <a class="btn btn-danger btn-sm" asp-controller="Client" asp-action="Delete" asp-route-id="@client.Id">Delete</a>
+                        <a class="btn btn-danger btn-sm" asp-controller="Client" asp-action="DeletePage" asp-route-id="@client.Id">Delete</a>
                       
                     </td>
                 </tr>

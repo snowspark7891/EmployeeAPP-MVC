@@ -1,51 +1,18 @@
-﻿@model ClientViewID
+﻿@model ClientDetails
 
-
-
-<div class="container m-4 shadow-lg rounded-2  p-5">
-    <h2 class="text-center"> Client Entry Form</h2>
-    <form id="EntryForm" asp-controller="Client" asp-action="UpdateAll" method="post" class="my-3">
-        <label>
-            Name of Client<span class="text-danger">*</span>
-        </label>
-        <input type="text" asp-for="Name" class="form-control" required />
-
-      
-
-        <label>
-            Role of Client<span class="text-danger">*</span>
-        </label>
-
-        <select asp-for="Role" class="form-select" required>
-            <option value="">Select Your Role</option>
-            <option value="Employee">Employee</option>
-            <option value="Curent Client">Curent Client</option>
-            <option value="Past User">Formmer Client</option>
-        </select>
-
-        <label>
-            Email<span class="text-danger">*</span>
-        </label>
-        <input type="email" asp-for="Email" class="form-control" required />
-
-        <label>
-            Address<span class="text-danger">*</span>
-        </label>
-
-     
-        <input type="text"   class="form-control mt-1 mb-1" asp-for="Address" required />
-        <input type="hidden" asp-for="Id" id="AddressesInput"  value="@Model.Id"/>
-        <input type="hidden" asp-for="OrderId"  value="@Model.OrderId" />
-
-        <br/>
-
-
-        <div class="text-center">
-            <button type="submit" class="btn  btn-primary mt-3">Save Changes</button>
-
-            <a class="btn btn-secondary mx-1 mt-3" asp-controller="Client" asp-action="Index">Cancel</a>
+<div class="container">
+    <h2>
+        Edit Client Address for ClientID <span>@Model.ClientId</span>
+    </h2>
+    <form asp-controller="Client" asp-action="EditLIst">
+        <div class="mb-3">
+            <label for="Address" class="form-label">Address</label>
+            <input type="text" asp-for="Address" id="Address" class="form-control" value="@Model.Address" required />
         </div>
-     
+        <input hidden  asp-for="OrderId" class="form-control" value="@Model.OrderId"  />
+        <input hidden  asp-for="ClientId"  class="form-control" value="@Model.ClientId" />
+        <button type="submit" class="btn btn-primary">Update Address</button>
+        <a class="btn btn-secondary" asp-controller="Client" asp-action="EditPage" asp-route-id="@Model.ClientId">Cancel</a>
     </form>
 
 </div>

@@ -61,6 +61,8 @@ namespace EmployeeeApp.Data
 
         }
 
+
+
         internal int GetClientTotalCount()
         {
             int count = 0;
@@ -107,82 +109,6 @@ namespace EmployeeeApp.Data
             }
         }
 
-        public EditId GetById(int id)
-        {
-            EditId client = null;
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(_connectionString))
-                {
-
-                    connection.Open();
-                    using (SqlCommand command = new SqlCommand("SELECT c.Id, c.Name, C.Role, c.Email, cd.Address, cd.Id AS OrderId FROM Client c JOIN ClientDetails cd ON c.Id = cd.CLientId WHERE c.Id = @Id ORDER BY c.Id, cd.Address;", connection))
-                    {
-                        command.Parameters.AddWithValue("@Id", id);
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            bool ClintIntial = false;
-                            while (reader.Read())
-                            {
-                                if (!ClintIntial)
-                                {
-                                    client = new EditId
-                                    {
-                                        Id = Convert.ToInt32(reader["Id"]),
-                                        Name = Convert.ToString(reader["Name"]),
-                                        Role = Convert.ToString(reader["Role"]),
-                                        Email = Convert.ToString(reader["Email"]),
-                                        list = new List<ClientDetails>()
-                                    };
-                                    ClintIntial = true;
-                                }
-                                client.list.Add(new ClientDetails
-                                {
-                                    OrderId = Convert.ToInt32(reader["OrderId"]),
-                                    ClientId = Convert.ToInt32(reader["Id"]),
-                                    Address = Convert.ToString(reader["Address"])
-                                });
-
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error retrieving client by ID: " + ex.Message);
-            }
-            return client;
-        }
-
-
-
-        public bool Update(EditId client)
-        {
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(_connectionString))
-                {
-                    connection.Open();
-                    using (SqlCommand command = new SqlCommand(
-                        "UPDATE Client SET Name = @Name, Role = @Role, Email = @Email WHERE Id = @Id", connection))
-                    {
-                        command.Parameters.AddWithValue("@Id", client.Id);
-                        command.Parameters.AddWithValue("@Name", client.Name);
-                        command.Parameters.AddWithValue("@Role", client.Role);
-                        command.Parameters.AddWithValue("@Email", client.Email);
-
-                        int rowsAffected = command.ExecuteNonQuery();
-                        return rowsAffected > 0;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error updating client data: " + ex.Message);
-            }
-        }
-
 
 
         public bool Delete(int id)
@@ -209,7 +135,7 @@ namespace EmployeeeApp.Data
                     }
                     if (rowaff > 0)
                     {
-                        using(SqlCommand command = new SqlCommand("Delete from ClientDetails where ClientId = @Id", connection))
+                        using (SqlCommand command = new SqlCommand("Delete from ClientDetails where ClientId = @Id", connection))
                         {
                             command.Parameters.AddWithValue("@Id", id);
                             command.BeginExecuteNonQuery();
@@ -229,7 +155,7 @@ namespace EmployeeeApp.Data
         }
 
 
-      
+
         public bool InsertAll(Creatmodel ve)
         {
             try
@@ -289,186 +215,249 @@ namespace EmployeeeApp.Data
 
 
 
-        public List<ClientViewID> GettNewView()
+        public ClientViewID GetViewBYId(int Id)
         {
-            List<ClientViewID> cli = new List<ClientViewID>();
-
+            ClientViewID client = null;
             try
             {
-                using (SqlConnection con = new SqlConnection(_connectionString))
+
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    con.Open();
-                    using (SqlCommand command = new SqlCommand("select c.Id,c.Name,C.Role,c.Email, cd.Address , cd.Id As OrderId from Client c join ClientDetails cd on c.Id = cd.CLientId ORDER BY c.Id, cd.Address;", con))
-                    {
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                cli.Add(new ClientViewID
-                                {
-                                    Id = Convert.ToInt32(reader["Id"]),
-                                    Name = Convert.ToString(reader["Name"]),
-                                    Role = Convert.ToString(reader["Role"]),
-                                    Email = Convert.ToString(reader["Email"]),
-                                    OrderId = Convert.ToInt32(reader["OrderId"]),
-                                    Address = Convert.ToString(reader["Address"])
-                                });
-
-                            }
-                        }
-
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error getting all clients: " + e.Message);
-            }
-            return cli;
-
-
-
-        }
-
-
-
-        public ClientViewID GetViewBYID(int Id,int OrderID)
-        {
-            ClientViewID cli = null;
-
-            try
-            {
-                using (SqlConnection con = new SqlConnection(_connectionString))
-                {
-                    con.Open();
-
-                    using (SqlCommand command = new SqlCommand("select c.Id,c.Name,C.Role,c.Email, cd.Address ,cd.Id As OrderId  from Client c join ClientDetails cd on c.Id = cd.CLientId where c.Id = @Id and cd.Id = @OrderId ORDER BY c.Id, cd.Address;", con))
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand("SELECT c.Id, c.Name, C.Role, c.Email, cd.Address, cd.Id AS OrderId FROM Client c left JOIN ClientDetails cd ON c.Id = cd.CLientId WHERE c.Id = @Id ORDER BY c.Id, cd.Address;", connection))
                     {
                         command.Parameters.AddWithValue("@Id", Id);
-                        command.Parameters.AddWithValue("@OrderId", OrderID);
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
+                            bool clientInitial = false;
                             while (reader.Read())
                             {
-                                cli = new ClientViewID()
+                                if (!clientInitial)
                                 {
-                                    Id = Convert.ToInt32(reader["Id"]),
-                                    Name = Convert.ToString(reader["Name"]),
-                                    Role = Convert.ToString(reader["Role"]),
-                                    Email = Convert.ToString(reader["Email"]),
-                                    Address = Convert.ToString(reader["Address"]),
-                                    OrderId = Convert.ToInt32(reader["OrderId"])
-                                    
-                                };
-
+                                    client = new ClientViewID
+                                    {
+                                        Id = Convert.ToInt32(reader["Id"]),
+                                        Name = Convert.ToString(reader["Name"]),
+                                        Role = Convert.ToString(reader["Role"]),
+                                        Email = Convert.ToString(reader["Email"]),
+                                        list = new List<ClientDetails>()
+                                    };
+                                    clientInitial = true;
+                                }
+                                client.list.Add(new ClientDetails
+                                {
+                                    //OrderId = Convert.ToInt32(reader["OrderId"]),
+                                    OrderId = reader.IsDBNull(reader.GetOrdinal("OrderId")) ? 0 : Convert.ToInt32(reader["OrderId"]),
+                                    ClientId = Convert.ToInt32(reader["Id"]),
+                                    //Address = Convert.ToString(reader["Address"])
+                                    Address = reader.IsDBNull(reader.GetOrdinal("Address")) ? null : Convert.ToString(reader["Address"])
+                                });
                             }
                         }
-
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new Exception("Error getting all clients: " + e.Message);
+                throw new Exception("Error retrieving client by ID: " + ex.Message);
             }
-            return cli;
+
+
+            return client;
+
         }
 
 
-        public bool UpdateAlll(ClientViewID ve)
+        public bool UpdateClient(Client clientr)
+        {
+            try
+            {
+
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand("Update Client set  Name = @Name , Role = @Role ,Email = @Email where Id = @Id;", connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", clientr.Id);
+                        command.Parameters.AddWithValue("@Name", clientr.Name);
+                        command.Parameters.AddWithValue("@Role", clientr.Role);
+                        command.Parameters.AddWithValue("@Email", clientr.Email);
+                        int rowwaffected = (int)command.ExecuteNonQuery();
+                        if (rowwaffected <= 0)
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error Can't Update Data : " + e.Message);
+            }
+        }
+
+        public bool DeleteClient(int Id)
         {
             try
             {
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    if (ve != null) { 
-                    
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand("Update Client set Name=@Name, Role=@Role, Email=@Email where Id = @Id ", connection))
+                    using (SqlCommand command = new SqlCommand("DELETE FROM Client WHERE Id = @Id", connection))
                     {
-                        
-                        command.Parameters.AddWithValue("@Id", ve.Id);
-                        command.Parameters.AddWithValue("@Name", ve.Name);
-                        command.Parameters.AddWithValue("@Role", ve.Role);
-                        command.Parameters.AddWithValue("@Email", ve.Email);
-                            command.ExecuteNonQuery();
+                        command.Parameters.AddWithValue("@Id", Id);
+                        int rowsAffected = command.ExecuteNonQuery();
+                        return rowsAffected > 0;
                     }
-
-                    
-                        
-                            using (SqlCommand command = new SqlCommand("Update ClientDetails set Address = @Address where ClientId =@ClientId and Id = @OrderId", connection))
-                            {
-
-                                command.Parameters.AddWithValue("@OrderId",ve.OrderId);
-                                command.Parameters.AddWithValue("@ClientId", ve.Id);
-                                command.Parameters.AddWithValue("@Address", ve.Address);
-                                int rowaff = (int)command.ExecuteNonQuery();
-
-                            return rowaff > 0;
-                            }
-
-                        
-                    }
-                    else
-                    {
-                        return false;
-                    }
-
-
-
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception("Error deleting all clients: " + ex.Message);
+                throw new Exception("Error deleting client: " + ex.Message);
             }
-
-
         }
 
+        //public bool UpdateAddress(ClientViewID clientr)
+        //{
+        //    try
+        //    {
+        //        using (SqlConnection connection = new SqlConnection(_connectionString))
+        //        {
+        //            connection.Open();
+        //            foreach (var address in clientr.list)
+        //            {
+        //                using (SqlCommand command = new SqlCommand("Update ClientDetails set Address = @Address where Id = @OrderId and ClientId = @ClientId", connection))
+        //                {
+        //                    command.Parameters.AddWithValue("@OrderId", address.OrderId);
+        //                    command.Parameters.AddWithValue("@ClientId", clientr.Id);
+        //                    command.Parameters.AddWithValue("@Address", address.Address);
+        //                    int rowwaffected = (int)command.ExecuteNonQuery();
+        //                    if (rowwaffected <= 0)
+        //                    {
+        //                        return false;
+        //                    }
+        //                }
+        //            }
+        //            return true;
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception("Error Can't Update Address : " + e.Message);
+        //    }
+        //}
 
 
-        public bool DeleteFromList(int Id)
+        public ClientDetails EditDetails(int Id, int OrderId)
         {
-            int rowaff = 0;
-            using (SqlConnection con = new SqlConnection(_connectionString))
+            ClientDetails clientDetails = null;
+            try
             {
-                con.Open();
-                using(SqlCommand cmd = new SqlCommand("Delete ClientDetails where Id = @Id", con))
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    if (Id > 0)
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand("SELECT * FROM ClientDetails WHERE Id = @OrderId AND ClientId = @Id", connection))
                     {
-                        cmd.Parameters.AddWithValue("@Id", Id);
-                        rowaff = (int)cmd.ExecuteNonQuery();
-                        return rowaff > 0;
+                        command.Parameters.AddWithValue("@OrderId", OrderId);
+                        command.Parameters.AddWithValue("@Id", Id);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                clientDetails = new ClientDetails
+                                {
+                                    OrderId = Convert.ToInt32(reader["Id"]),
+                                    ClientId = Convert.ToInt32(reader["ClientId"]),
+                                    Address = Convert.ToString(reader["Address"])
+                                };
+                            }
+                        }
                     }
-
                 }
-                return rowaff < 0;
             }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving client details: " + ex.Message);
+            }
+            return clientDetails;
+
+
         }
 
 
 
-        public bool AddADDRL(ClientViewID li)
+        public bool AddAddress(ClientDetails clientDetails)
         {
-            int rowaff = 0;
-            using(SqlConnection con = new SqlConnection(_connectionString))
+            try
             {
-                con.Open();
-                using(SqlCommand cmd = new SqlCommand("Insert into ClientDetails (ClientId,Address) values (@ClientId , @Address)", con))
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    cmd.Parameters.AddWithValue("@ClientId", li.Id);
-                    cmd.Parameters.AddWithValue("@Address", li.Address);
-                    rowaff = (int)cmd.ExecuteNonQuery();
-                    return rowaff>0;
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand("Update ClientDetails set Address = @Address where Id = @OrderId", connection))
+                    {
+                        command.Parameters.AddWithValue("@OrderId", clientDetails.OrderId);
+                        command.Parameters.AddWithValue("@Address", clientDetails.Address);
+                        int rowsAffected = command.ExecuteNonQuery();
+                        return rowsAffected > 0;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error adding address: " + ex.Message);
+            }
+        }
+
+        public bool DeleteAddress(int Id, int OrderId)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand("DELETE FROM ClientDetails WHERE Id = @OrderId AND ClientId = @Id", connection))
+                    {
+                        command.Parameters.AddWithValue("@OrderId", OrderId);
+                        command.Parameters.AddWithValue("@Id", Id);
+                        int rowsAffected = command.ExecuteNonQuery();
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting address: " + ex.Message);
+            }
+        }
+
+
+        public bool AddAddress(int Id, string address)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand("INSERT INTO ClientDetails (ClientId, Address) VALUES (@ClientId, @Address)", connection))
+                    {
+                        command.Parameters.AddWithValue("@ClientId", Id);
+                        command.Parameters.AddWithValue("@Address", address);
+                        int rowsAffected = command.ExecuteNonQuery();
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error adding address: " + ex.Message);
             }
         }
 
     }
-
-
 
 }
 
@@ -534,7 +523,140 @@ namespace EmployeeeApp.Data
 
 
 
+//public ClientViewID GetViewBYID(int Id, int OrderID)
+//{
+//    ClientViewID cli = null;
 
+//    try
+//    {
+//        using (SqlConnection con = new SqlConnection(_connectionString))
+//        {
+//            con.Open();
+
+//            using (SqlCommand command = new SqlCommand("select c.Id,c.Name,C.Role,c.Email, cd.Address ,cd.Id As OrderId  from Client c join ClientDetails cd on c.Id = cd.CLientId where c.Id = @Id and cd.Id = @OrderId ORDER BY c.Id, cd.Address;", con))
+//            {
+//                command.Parameters.AddWithValue("@Id", Id);
+//                command.Parameters.AddWithValue("@OrderId", OrderID);
+//                using (SqlDataReader reader = command.ExecuteReader())
+//                {
+//                    while (reader.Read())
+//                    {
+//                        cli = new ClientViewID()
+//                        {
+//                            Id = Convert.ToInt32(reader["Id"]),
+//                            Name = Convert.ToString(reader["Name"]),
+//                            Role = Convert.ToString(reader["Role"]),
+//                            Email = Convert.ToString(reader["Email"]),
+//                            Address = Convert.ToString(reader["Address"]),
+//                            OrderId = Convert.ToInt32(reader["OrderId"])
+
+//                        };
+
+//                    }
+//                }
+
+//            }
+//        }
+//    }
+//    catch (Exception e)
+//    {
+//        throw new Exception("Error getting all clients: " + e.Message);
+//    }
+//    return cli;
+//}
+
+
+//public bool UpdateAlll(ClientViewID ve)
+//{
+//    try
+//    {
+//        using (SqlConnection connection = new SqlConnection(_connectionString))
+//        {
+//            if (ve != null)
+//            {
+
+//                connection.Open();
+//                using (SqlCommand command = new SqlCommand("Update Client set Name=@Name, Role=@Role, Email=@Email where Id = @Id ", connection))
+//                {
+
+//                    command.Parameters.AddWithValue("@Id", ve.Id);
+//                    command.Parameters.AddWithValue("@Name", ve.Name);
+//                    command.Parameters.AddWithValue("@Role", ve.Role);
+//                    command.Parameters.AddWithValue("@Email", ve.Email);
+//                    command.ExecuteNonQuery();
+//                }
+
+
+
+//                using (SqlCommand command = new SqlCommand("Update ClientDetails set Address = @Address where ClientId =@ClientId and Id = @OrderId", connection))
+//                {
+
+//                    command.Parameters.AddWithValue("@OrderId", ve.OrderId);
+//                    command.Parameters.AddWithValue("@ClientId", ve.Id);
+//                    command.Parameters.AddWithValue("@Address", ve.Address);
+//                    int rowaff = (int)command.ExecuteNonQuery();
+
+//                    return rowaff > 0;
+//                }
+
+
+//            }
+//            else
+//            {
+//                return false;
+//            }
+
+
+
+//        }
+//    }
+//    catch (Exception ex)
+//    {
+//        throw new Exception("Error deleting all clients: " + ex.Message);
+//    }
+
+
+//}
+
+
+
+//public bool DeleteFromList(int Id)
+//{
+//    int rowaff = 0;
+//    using (SqlConnection con = new SqlConnection(_connectionString))
+//    {
+//        con.Open();
+//        using (SqlCommand cmd = new SqlCommand("Delete ClientDetails where Id = @Id", con))
+//        {
+//            if (Id > 0)
+//            {
+//                cmd.Parameters.AddWithValue("@Id", Id);
+//                rowaff = (int)cmd.ExecuteNonQuery();
+//                return rowaff > 0;
+//            }
+
+//        }
+//        return rowaff < 0;
+//    }
+//}
+
+
+
+//public bool AddADDRL(ClientViewID li)
+//{
+//    int rowaff = 0;
+//    using (SqlConnection con = new SqlConnection(_connectionString))
+//    {
+//        con.Open();
+//        using (SqlCommand cmd = new SqlCommand("Insert into ClientDetails (ClientId,Address) values (@ClientId , @Address)", con))
+//        {
+//            cmd.Parameters.AddWithValue("@ClientId", li.Id);
+//            cmd.Parameters.AddWithValue("@Address", li.Address);
+//            rowaff = (int)cmd.ExecuteNonQuery();
+//            return rowaff > 0;
+//        }
+//    }
+//}
 
 
 

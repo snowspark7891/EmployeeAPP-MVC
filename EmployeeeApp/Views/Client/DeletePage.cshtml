@@ -1,0 +1,59 @@
+﻿@model ClientViewID
+
+<div class="container shadow-lg p-4">
+    <h2 class="text-center" >Are you sure You Want to delete this Client ?</h2>
+    <hr />
+    <div class="d-flex align-content-center m-2 container">
+        <table class="table table-bordered table-warning text-center">
+            <thead>
+                <tr>
+                    <th><h2>Client Details</h2></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@Model.Name</td>
+                </tr>
+                <tr>
+                    <td>@Model.Role</td>
+                </tr>
+                <tr>
+                    <td>@Model.Email</td>
+                </tr>
+                <tr>
+                    <td>
+                        @if (Model.list != null && Model.list.Count > 0)
+                        {
+                            
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+
+                                        <th><h3>Addresses:</h3></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.list)
+                                    {
+                                        <tr>
+                                           
+                                            <td>@order.Address</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </td>
+                    </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <form asp-controller="Client" asp-action="DeleteClient" method="post">
+        <input type="hidden" asp-for="Id" value="@Model.Id" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a class="btn btn-secondary" asp-controller="Client" asp-action="EditPage" asp-route-id="@Model.Id">Cancel</a>
+    </form>
+</div>
