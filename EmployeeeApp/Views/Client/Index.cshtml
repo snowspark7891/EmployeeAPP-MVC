@@ -12,9 +12,9 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <a class="btn btn-primary btn-sm" asp-controller="Employee" asp-action="Index">Go to Employee List</a>
 
-        <a class="btn btn-outline-info" asp-controller="Client" asp-action="InsertAll">Add Clients</a>
+        <a class="btn btn-outline-info" asp-controller="Client" asp-action="InsertAll"><i class="bi bi-pencil-square"></i>Add Clients</a>
     </div>
-    <table class="table table-sm table-bordered">
+    <table class="table table-sm table-bordered table-hover">
         <thead class="table-light">
             <tr class="text-center">
                 @* <th>Client ID</th> *@
@@ -22,7 +22,7 @@
                 <th>Role</th>
                 <th>Email</th>
                
-                <th class="text-center">Actions</th>
+                <th class="text-center">Delete</th>
             </tr>
         </thead>
         <tbody>
@@ -30,13 +30,13 @@
             {
                 <tr class="text-center">
                     @* <td>@client.Id</td> *@
-                    <td>@client.Name</td>
-                    <td>@client.Role</td>
-                    <td>@client.Email</td>
+                    <td> <a class="text-black text-decoration-none" asp-controller="Client" asp-action="EditPage" asp-route-id="@client.Id">@client.Name</a></td>
+                    <td> <a class="text-black text-decoration-none" asp-controller="Client" asp-action="EditPage" asp-route-id="@client.Id">@client.Role</a></td>
+                    <td> <a class="text-black text-decoration-none" asp-controller="Client" asp-action="EditPage" asp-route-id="@client.Id">@client.Email</a></td>
                    <td class="text-center">
-                        <a class="btn btn-warning btn-sm" asp-controller="Client" asp-action="EditPage" asp-route-id="@client.Id">Edit</a>
-                      
-                        <a class="btn btn-danger btn-sm" asp-controller="Client" asp-action="DeletePage" asp-route-id="@client.Id">Delete</a>
+
+
+                        <a class="btn btn-outline-danger btn-sm" asp-controller="Client" asp-action="DeletePage" asp-route-id="@client.Id"><i class="bi bi-trash-fill"></i>Delete</a>
                       
                     </td>
                 </tr>

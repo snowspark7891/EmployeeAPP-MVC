@@ -72,7 +72,7 @@ namespace EmployeeeApp.Controllers
                     ModelState.AddModelError("", "Failed to insert all clients. Please try again.");
                 }
             }
-            return View("Single", b);
+            return RedirectToAction("Index");
         }
 
 

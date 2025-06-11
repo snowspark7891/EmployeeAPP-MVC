@@ -32,7 +32,7 @@
             Address<span class="text-danger">*</span>
         </label>
        
-        <input type="text" id="AddressValue" placeholder="Enter Your Address" class="form-control mt-1 mb-1" />
+        <input type="text" id="AddressValue" placeholder="Enter Your Address" class="form-control"/>
          <button type="button" class="btn btn-secondary" id="AddAddressButton">Add Address</button>
      
 
@@ -51,7 +51,7 @@
             </table>
         <input type="hidden" asp-for="AddressJson" id="AddressesInput" />
 
-        <button type="submit" class="btn align-self-center btn-primary mt-3">Save Client</button>
+        <button type="submit" class="btn align-self-center btn-outline-primary mt-3"><i class="bi bi-bookmark-check"></i>Save Client</button>
         <a class="btn btn-secondary mx-1 mt-3" asp-controller="Client" asp-action="Index">Cancel</a>
         </form>
 
@@ -108,13 +108,13 @@
                 let actionCell = document.createElement("td");
                 let deleteButton = document.createElement("button");
                 deleteButton.textContent = "Delete";
-                deleteButton.className = "btn btn-danger btn-sm me-2";
+                deleteButton.className = "btn btn-outline-danger btn-sm me-2";
                 deleteButton.addEventListener("click", () => deleteAddress(index));
 
 
                 let editButton = document.createElement("button");
                 editButton.textContent = "Edit";
-                editButton.className = "btn btn-warning btn-sm";
+                editButton.className = "btn btn-outline-warning btn-sm";
                 editButton.addEventListener("click", () => EditAddress(index));
 
                 actionCell.appendChild(deleteButton);
