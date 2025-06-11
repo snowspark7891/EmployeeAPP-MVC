@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
+using System.Net;
 
 namespace EmployeeeApp.Data
 {
@@ -168,8 +169,8 @@ namespace EmployeeeApp.Data
                     using (SqlCommand command = new SqlCommand("Insert into Client (Name,Role,Email) output inserted.Id values(@Name,@Role,@Email)", connection))
                     {
                         command.Parameters.AddWithValue("@Name", ve.Name);
-                        command.Parameters.AddWithValue("@Role", ve.Role);
-                        command.Parameters.AddWithValue("@Email", ve.Email);
+                        command.Parameters.AddWithValue("@Role", string.IsNullOrEmpty(ve.Role) ? (object)DBNull.Value : ve.Role);
+                        command.Parameters.AddWithValue("@Email", string.IsNullOrEmpty(ve.Email) ? (object)DBNull.Value : ve.Email);
                         Object result = command.ExecuteScalar();
                         if (result != null)
                         {
@@ -184,9 +185,10 @@ namespace EmployeeeApp.Data
 
                     if (insertedId > 0)
                     {
-
+                       
                         foreach (string address in ve.Addresses)
                         {
+                            string addressToInsert = string.IsNullOrEmpty(address) ? string.Empty : address;
                             using (SqlCommand command = new SqlCommand("Insert into ClientDetails (ClientId,Address) values (@ClientId , @Address)", connection))
                             {
 
@@ -238,8 +240,8 @@ namespace EmployeeeApp.Data
                                     {
                                         Id = Convert.ToInt32(reader["Id"]),
                                         Name = Convert.ToString(reader["Name"]),
-                                        Role = Convert.ToString(reader["Role"]),
-                                        Email = Convert.ToString(reader["Email"]),
+                                        Role = reader.IsDBNull(reader.GetOrdinal("Role")) ? null : Convert.ToString(reader["Role"]),
+                                        Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? null : Convert.ToString(reader["Email"]),
                                         list = new List<ClientDetails>()
                                     };
                                     clientInitial = true;

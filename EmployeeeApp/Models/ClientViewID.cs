@@ -8,12 +8,13 @@ namespace EmployeeeApp.Models
 
         public string Name { get; set; }
 
-        public string Role { get; set; }
+        public string? Role { get; set; }
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
-        [AllowNull]
-        public List<ClientDetails> list = new List<ClientDetails>();
+        public string? AddressJson { get; set; }
+
+        public List<string> Addresses = new List<string>();
        
     }
 }

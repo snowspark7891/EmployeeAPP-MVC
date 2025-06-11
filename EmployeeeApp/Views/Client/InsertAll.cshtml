@@ -16,7 +16,7 @@
             Role of Client<span class="text-danger">*</span>
         </label>
        
-         <select asp-for="Role" class="form-select" required>
+         <select asp-for="Role" class="form-select">
                 <option value="">Select Your Role</option>
                 <option value="Employee">Employee</option>
                 <option value="Curent Client">Curent Client</option>
@@ -26,7 +26,7 @@
         <label>
                 Email<span class="text-danger">*</span>
         </label>
-        <input type="email" asp-for="Email" class="form-control" required />
+        <input type="email" asp-for="Email" class="form-control"  />
 
         <label>
             Address<span class="text-danger">*</span>
@@ -128,8 +128,7 @@
              document.getElementById("AddressesInput").value = JSON.stringify(addressList);
 
 
-           // JSON.stringify(addressList);
-          //  does this format store data into indivisual string separetyed for the list data type so later can a loop run on that list as diffrent entities
+          
         }
        
     });
