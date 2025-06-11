@@ -17,208 +17,234 @@ namespace EmployeeeApp.Controllers
         }
 
 
-        public IActionResult Index(int Page = 1, int PageNumber = 10)
+        public IActionResult Index()
         {
-            List<Client> clients = _clientData.GetAll(Page, PageNumber);
-            int totalEmployees = _clientData.GetClientTotalCount();
-
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalEmployees / PageNumber);
-            ViewBag.CurrentPage = Page;
-
+           List<ClientView> clients = _clientData.GetALL();
             return View(clients);
         }
 
-        //public IActionResult Create()
-        //{
-        //    return View();
-        //}
-
-        //[HttpPost]
-        //public IActionResult Create(Client client)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        if (_clientData.Insert(client))
-        //        {
-        //            return RedirectToAction("Index");
-        //        }
-        //        else
-        //        {
-        //            ModelState.AddModelError("", "Failed to create client. Please try again.");
-        //        }
-        //    }
-        //    return View(client);
-        //}
-
-
-
-
-        public IActionResult InsertAll()
+        public IActionResult Create()
         {
             return View();
         }
-
         [HttpPost]
-        public IActionResult InsertAll(Creatmodel b)
+        public IActionResult Create(ClientView client)
         {
             if (ModelState.IsValid)
             {
-                if (_clientData.InsertAll(b))
+                if (_clientData.AddClient(client))
                 {
+                    TempData["SuccessMessage"] = "Client added successfully!";
                     return RedirectToAction("Index");
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Failed to insert all clients. Please try again.");
+                    ModelState.AddModelError("", "Failed to add client. Please try again.");
                 }
             }
-            return RedirectToAction("Index");
-        }
-
-
-
-        //main client oprations
-
-        [HttpGet]
-        public IActionResult EditPage(int Id)
-        {
-            ClientViewID client = _clientData.GetViewBYId(Id);
-            if (client == null)
-            {
-                return NotFound();
-            }
             return View(client);
         }
 
-        [HttpPost]
-        public IActionResult EditClient(ClientViewID client)
-        {
-
-            Client client1 = new Client
-            {
-                Id = client.Id,
-                Name = client.Name,
-                Role = client.Role,
-                Email = client.Email
-            };
-            if (_clientData.UpdateClient(client1))
-            {
-                return RedirectToAction("Index");
-            }
-            ClientViewID cli = _clientData.GetViewBYId(client.Id);
-            return View("EditPage", cli);
-
-        }
-
-        [HttpGet]
-        public IActionResult DeletePage(int Id)
-        {
-            ClientViewID client = _clientData.GetViewBYId(Id);
-            if (client == null)
-            {
-                return NotFound();
-            }
-            return View(client);
-        }
-
-        [HttpPost]
-        public IActionResult DeleteClient(int Id)
-        {
-            if (_clientData.DeleteClient(Id))
-            {
-                return RedirectToAction("Index");
-            }
-            ClientViewID cli = _clientData.GetViewBYId(Id);
-            return View("DeletePage", cli);
-        }
-
-
-        //address table operations
-
-        [HttpGet]
-        public IActionResult EditLIst(int Id, int OrderID)
-        {
-            ClientDetails client = _clientData.EditDetails(Id, OrderID);
-
-
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            return View(client);
-        }
-
-        [HttpPost]
-        public IActionResult EditLIst(ClientDetails client)
-        {
-            if (_clientData.AddAddress(client))
-            {
-                int Id = client.ClientId;
-                ClientViewID cli = _clientData.GetViewBYId(Id);
-                return View("EditPage", cli);
-            }
-            return View("EditList", client);
-
-        }
-
-        [HttpGet]
-        public IActionResult DeleteList(int Id, int OrderId)
-        {
-            ClientDetails client = _clientData.EditDetails(Id, OrderId);
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            return View(client);
-        }
-        [HttpPost]
-        public IActionResult DeleteList(ClientDetails client)
-        {
-            int Id = client.ClientId;
-            int OrderId = client.OrderId;
-            if (_clientData.DeleteAddress(Id, OrderId))
-            {
-
-                ClientViewID cli = _clientData.GetViewBYId(Id);
-                return View("EditPage", cli);
-            }
-            return View("DeleteList", client);
-        }
 
 
 
 
-        [HttpGet]
-        public IActionResult AddAddressList(int Id)
-        {
-            ClientDetails client = new ClientDetails
-            {
-                ClientId = Id
-            };
-            if (client == null)
-            {
-                return NotFound();
-            }
-            return View(client);
-        }
-        [HttpPost]
-        public IActionResult AddAddresslist(int Id, string Address)
-        {
-            if (_clientData.AddAddress(Id, Address))
-            {
-                ClientViewID cli = _clientData.GetViewBYId(Id);
-                return View("EditPage", cli);
-            }
-            else
-            {
-                return NotFound();
-            }
-        }
 
 
 
+
+
+
+
+
+        //public IActionResult Index(int Page = 1, int PageNumber = 10)
+        //{
+        //    List<Client> clients = _clientData.GetAll(Page, PageNumber);
+        //    int totalEmployees = _clientData.GetClientTotalCount();
+
+        //    ViewBag.TotalPages = (int)Math.Ceiling((double)totalEmployees / PageNumber);
+        //    ViewBag.CurrentPage = Page;
+
+        //    return View(clients);
+        //}
+
+
+
+
+
+        //public IActionResult InsertAll()
+        //{
+        //    return View(new ClientViewID { Addresses = new List<ClientDetails>() });
+        //}
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult InsertAll(ClientViewID model)
+        //{
+
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        if (_clientData.InsertAll(model))
+        //        {
+        //            TempData["SuccessMessage"] = "Client and details saved successfully!";
+        //            model.Addresses.RemoveAll(cd => string.IsNullOrWhiteSpace(cd.Address));
+        //            return RedirectToAction("Index");
+        //        }
+        //        else
+        //        {
+        //            ModelState.AddModelError("", "Failed to save client due to a data access error. Please try again.");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        ModelState.AddModelError("", "Please correct the errors in the form before saving.");
+        //    }
+
+        //    return View(model);
+        //}
+
+
+
+        ////main client oprations
+
+        //[HttpGet]
+        //public IActionResult EditPage(int Id)
+        //{
+        //    ClientViewID client = _clientData.GetViewBYId(Id);
+        //    if (client == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(client);
+        //}
+
+        //[HttpPost]
+        //public IActionResult EditClient(ClientViewID client)
+        //{
+
+        //    Client client1 = new Client
+        //    {
+        //        Id = client.Id,
+        //        Name = client.Name,
+        //        Role = client.Role,
+        //        Email = client.Email
+        //    };
+        //    if (_clientData.UpdateClient(client1))
+        //    {
+        //        return RedirectToAction("Index");
+        //    }
+        //    ClientViewID cli = _clientData.GetViewBYId(client.Id);
+        //    return View("EditPage", cli);
+
+        //}
+
+        //[HttpGet]
+        //public IActionResult DeletePage(int Id)
+        //{
+        //    ClientViewID client = _clientData.GetViewBYId(Id);
+        //    if (client == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(client);
+        //}
+
+        //[HttpPost]
+        //public IActionResult DeleteClient(int Id)
+        //{
+        //    if (_clientData.DeleteClient(Id))
+        //    {
+        //        return RedirectToAction("Index");
+        //    }
+        //    ClientViewID cli = _clientData.GetViewBYId(Id);
+        //    return View("DeletePage", cli);
+        //}
+
+
+        ////address table operations
+
+        //[HttpGet]
+        //public IActionResult EditLIst(int Id, int OrderID)
+        //{
+        //    ClientDetails client = _clientData.EditDetails(Id, OrderID);
+
+
+        //    if (client == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return View(client);
+        //}
+
+        //[HttpPost]
+        //public IActionResult EditLIst(ClientDetails client)
+        //{
+        //    if (_clientData.AddAddress(client))
+        //    {
+        //        int Id = client.ClientId;
+        //        ClientViewID cli = _clientData.GetViewBYId(Id);
+        //        return View("EditPage", cli);
+        //    }
+        //    return View("EditList", client);
+
+        //}
+
+        //[HttpGet]
+        //public IActionResult DeleteList(int Id, int OrderId)
+        //{
+        //    ClientDetails client = _clientData.EditDetails(Id, OrderId);
+        //    if (client == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return View(client);
+        //}
+        //[HttpPost]
+        //public IActionResult DeleteList(ClientDetails client)
+        //{
+        //    int Id = client.ClientId;
+        //    int OrderId = client.OrderId;
+        //    if (_clientData.DeleteAddress(Id, OrderId))
+        //    {
+
+        //        ClientViewID cli = _clientData.GetViewBYId(Id);
+        //        return View("EditPage", cli);
+        //    }
+        //    return View("DeleteList", client);
+        //}
+
+
+
+
+        //[HttpGet]
+        //public IActionResult AddAddressList(int Id)
+        //{
+        //    ClientDetails client = new ClientDetails
+        //    {
+        //        ClientId = Id
+        //    };
+        //    if (client == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(client);
+        //}
+        //[HttpPost]
+        //public IActionResult AddAddresslist(int Id, string Address)
+        //{
+        //    if (_clientData.AddAddress(Id, Address))
+        //    {
+        //        ClientViewID cli = _clientData.GetViewBYId(Id);
+        //        return View("EditPage", cli);
+        //    }
+        //    else
+        //    {
+        //        return NotFound();
+        //    }
+        //}
 
 
 

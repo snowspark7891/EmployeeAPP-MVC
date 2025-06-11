@@ -1,42 +1,240 @@
-﻿@model Client
+﻿@model EmployeeeApp.Models.ClientView
 
+@{
+    ViewData["Title"] = "Create New Client";
+}
 
+<div class="container m-4 shadow-lg rounded-2 p-5">
+    <div class="row">
+        <div class="col-12 text-center mt-3 mb-3">
+            <h2>Create New Client</h2>
+        </div>
+    </div>
+    <form asp-controller="Client" asp-action="Create" method="post" id="clientForm">
+        @* Anti-forgery token for security *@
+        <input type="hidden" name="__RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+        <input type="hidden" asp-for="Id" /> @* For edit scenarios, will be 0 for new *@
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">Add New Client</h2>
-
-    <form asp-controller="Client" asp-action="Create" method="post" enctype="multipart/form-data" class="border p-3 rounded">
-      
         <div class="mb-3">
-            <label for="Name" class="form-label">Name of Client</label>
-            <input asp-for="Name" class="form-control" />
+            <label asp-for="Name" class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" asp-for="Name" class="form-control" placeholder="Enter Name" />
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
 
-       <div class="mb-3">
-            <label for="Role" class="form-label">Role of Client</label>
-           <select asp-for="Role" class="form-select">
-                <option value="">Select Your Role</option>
-                <option value="Employee">Employee</option>
-                <option value="Curent Client">Curent Client</option>
-                <option value="Past User">Formmer Client</option>
-          </select>
-            <span asp-validation-for="Role" class="text-danger"></span>
-       </div>
-
         <div class="mb-3">
-            <label for="Email" class="form-label">Email</label>
-            <input asp-for="Email" class="form-control" />
+            <label asp-for="Email" class="form-label">Email</label>
+            <input type="email" asp-for="Email" class="form-control" placeholder="Enter Your Email" />
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label">Role</label>
+            <select asp-for="Role" class="form-select">
+                <option value="">Select Role</option>
+                <option value="Employee">Employee</option>
+                <option value="Client">Client</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
+
+        <h3 class="mt-4">Addresses (Cities)</h3>
+        <table class="table table-bordered table-sm" id="addressTable">
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if(Model.Addresses != null && Model.Addresses.Count > 0)
+                {
+                    for (int i = 0; i < Model.Addresses.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                <input type="text" name="Addresses[@i]" class="form-control" value="@Model.Addresses[i]" placeholder="Enter City" />
+                                <span asp-validation-for="Addresses[@i]" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, 'Addresses')">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td>
+                            <input type="text" name="Addresses[0]" class="form-control" placeholder="Enter City" />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, 'Addresses')">Delete</button>
+                        </td>
+                    </tr>
+                }
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-secondary mb-3" onclick="addRow('Addresses')">Add New Address</button>
 
 
-     
-        <div class="d-flex justify-content-between">
-            <a class="btn btn-secondary" asp-controller="Client" asp-action="Index">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save Client</button>
+        @* <h3 class="mt-4">Phone Numbers</h3>
+        <table class="table table-bordered table-sm" id="phoneTable">
+            <thead>
+                <tr>
+                    <th>Phone Number</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                @for (int i = 0; i < Model.PhoneNumbers.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <input type="text" name="PhoneNumbers[@i]" class="form-control" value="@Model.PhoneNumbers[i]" />
+                          
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, 'PhoneNumbers')">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        *@
+
+
+        
+        <div asp-validation-summary="ModelOnly" class="text-danger mt-3"></div>
+
+        <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-primary" type="submit">Save All</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
         </div>
     </form>
 </div>
-   
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function addRow(listName) {
+            let tableBodyId = 'addressTable'       //listName === 'Addresses' ? 'addressTable' : 'phoneTable';
+            let index = $(`#${tableBodyId} tbody tr`).length;
+            let inputName = `${listName}[${index}]`;
+            let placeholder =  'Enter City'                //listName === 'Addresses' ? 'Enter City' : 'Enter Phone Number';
+
+            let newRowHtml = `
+                <tr>
+                    <td>
+                        <input type="text" name="${inputName}" class="form-control" placeholder="${placeholder}" />
+                       
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, '${listName}')">Delete</button>
+                    </td>
+                </tr>`;
+            $(`#${tableBodyId} tbody`).append(newRowHtml);
+
+          
+            let form = $('#clientForm');
+            form.removeData('validator');
+            form.removeData('unobtrusiveValidation');
+            $.validator.unobtrusive.parse(form);
+        }
+
+        function removeRow(button, listName) {
+            $(button).closest('tr').remove();
+            updateRowIndexes(listName);
+        }
+
+        function updateRowIndexes(listName) {
+            let tableBodyId = listName === 'Addresses' ? 'addressTable' : 'phoneTable';
+            $(`#${tableBodyId} tbody tr`).each(function (i, row) {
+                $(row).find('input, select, textarea').each(function () {
+                    let currentName = $(this).attr('name');
+                    if (currentName) {
+                        let newName = `${listName}[${i}]`;
+                        $(this).attr('name', newName);
+                        
+                        $(this).attr('data-valmsg-for', newName);
+                    }
+                });
+            });
+        }
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* @model ClientView
+
+<div class="Contailer shadow">
+    <div class="row">
+        <div class="col-12 text-center mt-3 mb-3">
+            <h2>Create New Client</h2>
+        </div>
+    </div>
+    <form>
+        <div class="mt-1">
+            <label for="Name" class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="Name" name="Name" placeholder="Enter Name" asp-for="Name" required>
+        </div>
+        <div class="mt-1">
+            <label for="Email" class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" asp-for="Email" id="Email" name="Email" placeholder="Enter Your Email">
+        </div>
+        <div>
+            <label for="Role" class="form-label">Role <span class="text-danger">*</span></label>
+            <select class="form-select" asp-for="Role" id="Role" name="Role" required>
+                <option value="">Select Role</option>
+                <option value="Admin">Employee</option>
+                <option value="User">Client</option>
+            </select>
+        </div>
+        <div>
+            <h3 class="mt-1">Address</h3>
+            <table>
+                <thead>
+                    <tr>
+                        @* <th>Street</th> *@
+                        @* <th>City</th> *@
+                        @* <th>State</th>
+                        <th>Zip Code</th> *@@*
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="Tablebody">
+                    
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary" type="button">Button</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Button</a>
+        </div>
+    </form>
+</div> *@
