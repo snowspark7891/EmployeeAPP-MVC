@@ -10,11 +10,11 @@
         public string? Role { get; set; }
 
         
-        public string? Address { get; set; }
+      
 
-        public int? addressId { get; set; }
+        
 
-        public List<string> Addresses { get; set; } = new List<string>();
+        public List<ClientDetails> Clientlist { get; set; } = new List<ClientDetails>();
 
 
     }

@@ -11,9 +11,9 @@
         </div>
     </div>
     <form asp-controller="Client" asp-action="Create" method="post" id="clientForm">
-        @* Anti-forgery token for security *@
+
         <input type="hidden" name="__RequestVerificationToken" value="@Html.AntiForgeryToken()" />
-        <input type="hidden" asp-for="Id" /> @* For edit scenarios, will be 0 for new *@
+        <input type="hidden" asp-for="Id" />
 
         <div class="mb-3">
             <label asp-for="Name" class="form-label">Name <span class="text-danger">*</span></label>
@@ -42,21 +42,34 @@
             <thead>
                 <tr>
                     <th>City</th>
+                    <th>State</th>
+                    <th>Pincode</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                @if(Model.Addresses != null && Model.Addresses.Count > 0)
+                @if (Model.Clientlist != null && Model.Clientlist.Any())
                 {
-                    for (int i = 0; i < Model.Addresses.Count; i++)
+                    @for (int i = 0; i < Model.Clientlist.Count; i++)
                     {
                         <tr>
                             <td>
-                                <input type="text" name="Addresses[@i]" class="form-control" value="@Model.Addresses[i]" placeholder="Enter City" />
-                                <span asp-validation-for="Addresses[@i]" class="text-danger"></span>
+                                <input type="hidden" asp-for="Clientlist[i].AddressId" />
+                                <input type="hidden" asp-for="Clientlist[i].ClientId" />
+                                <input type="text" asp-for="Clientlist[i].CityName" class="form-control address-input" placeholder="Enter City" />
+                                <span asp-validation-for="Clientlist[i].CityName" class="text-danger"></span>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, 'Addresses')">Delete</button>
+                                <input type="text" asp-for="Clientlist[i].StateName" class="form-control address-input" placeholder="Enter State" />
+                                <span asp-validation-for="Clientlist[i].StateName" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <input type="text" asp-for="Clientlist[i].Pincode" class="form-control address-input" placeholder="Enter Pincode" />
+                                <span asp-validation-for="Clientlist[i].Pincode" class="text-danger"></span>
+                            </td>
+                            <td>
+                               
+                                <button type="button" class="btn btn-danger btn-sm delete-row-btn" data-address-id="@Model.Clientlist[i].AddressId">Delete</button>
                             </td>
                         </tr>
                     }
@@ -65,53 +78,33 @@
                 {
                     <tr>
                         <td>
-                            <input type="text" name="Addresses[0]" class="form-control" placeholder="Enter City" />
+                            <input type="hidden" name="Clientlist[0].AddressId" value="0" />
+                            <input type="hidden" name="Clientlist[0].ClientId" value="@Model.Id" />
+                            <input type="text" name="Clientlist[0].CityName" class="form-control address-input" placeholder="Enter City" />
+                            <span data-valmsg-for="Clientlist[0].CityName" class="text-danger"></span>
                         </td>
                         <td>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, 'Addresses')">Delete</button>
-                        </td>
-                    </tr>
-                }
-                    </tr>
-                }
-
-            </tbody>
-        </table>
-        <button type="button" class="btn btn-secondary mb-3" onclick="addRow('Addresses')">Add New Address</button>
-
-
-        @* <h3 class="mt-4">Phone Numbers</h3>
-        <table class="table table-bordered table-sm" id="phoneTable">
-            <thead>
-                <tr>
-                    <th>Phone Number</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-                @for (int i = 0; i < Model.PhoneNumbers.Count; i++)
-                {
-                    <tr>
-                        <td>
-                            <input type="text" name="PhoneNumbers[@i]" class="form-control" value="@Model.PhoneNumbers[i]" />
-                          
+                            <input type="text" name="Clientlist[0].StateName" class="form-control address-input" placeholder="Enter State" />
+                            <span data-valmsg-for="Clientlist[0].StateName" class="text-danger"></span>
                         </td>
                         <td>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, 'PhoneNumbers')">Delete</button>
+                            <input type="text" name="Clientlist[0].Pincode" class="form-control address-input" placeholder="Enter Pincode" />
+                            <span data-valmsg-for="Clientlist[0].Pincode" class="text-danger"></span>
+                        </td>
+                        <td>
+                           
+                            <button type="button" class="btn btn-danger btn-sm delete-row-btn" data-address-id="0" style="display:none;">Delete</button>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
-        *@
+        <button type="button" class="btn btn-secondary mb-3" id="addNewAddressBtn">Add New Address</button>
 
-
-        
         <div asp-validation-summary="ModelOnly" class="text-danger mt-3"></div>
 
         <div class="d-grid gap-2 mt-4">
-            <button class="btn btn-primary" type="submit">Save All</button>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-bookmark-plus"></i> Save All</button>
             <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
         </div>
     </form>
@@ -123,118 +116,139 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        function addRow(listName) {
-            let tableBodyId = 'addressTable'       //listName === 'Addresses' ? 'addressTable' : 'phoneTable';
-            let index = $(`#${tableBodyId} tbody tr`).length;
-            let inputName = `${listName}[${index}]`;
-            let placeholder =  'Enter City'                //listName === 'Addresses' ? 'Enter City' : 'Enter Phone Number';
+        function updateRowIndexes() {
+            $('#addressTable tbody tr').each(function (i, row) {
+                $(row).find('input, select, textarea, span[data-valmsg-for]').each(function () {
+                    let currentName = $(this).attr('name') || $(this).attr('data-valmsg-for');
+                    if (currentName) {
+                        let newName = currentName.replace(/Clientlist\[\d+\]/, `Clientlist[${i}]`);
+                        if ($(this).is('input') || $(this).is('select') || $(this).is('textarea')) {
+                            $(this).attr('name', newName);
+                            $(this).attr('data-valmsg-for', newName);
+                        } else if ($(this).is('span')) {
+                            $(this).attr('data-valmsg-for', newName);
+                        }
+                    }
+                });
+            });
+            reparseFormValidation();
+        }
 
-            let newRowHtml = `
-                <tr>
-                    <td>
-                        <input type="text" name="${inputName}" class="form-control" placeholder="${placeholder}" />
-                       
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, '${listName}')">Delete</button>
-                    </td>
-                </tr>`;
-            $(`#${tableBodyId} tbody`).append(newRowHtml);
-
-          
+        function reparseFormValidation() {
             let form = $('#clientForm');
             form.removeData('validator');
             form.removeData('unobtrusiveValidation');
             $.validator.unobtrusive.parse(form);
         }
 
-        function removeRow(button, listName) {
-            $(button).closest('tr').remove();
-            updateRowIndexes(listName);
+        function toggleDeleteButton(row) {
+            let cityVal = $(row).find('input[name$=".CityName"]').val().trim();
+            let stateVal = $(row).find('input[name$=".StateName"]').val().trim();
+            let pincodeVal = $(row).find('input[name$=".Pincode"]').val().trim();
+            let deleteButton = $(row).find('.delete-row-btn');
+
+            if (cityVal !== '' || stateVal !== '' || pincodeVal !== '') {
+                deleteButton.show();
+            } else {
+                deleteButton.hide();
+            }
         }
 
-        function updateRowIndexes(listName) {
-            let tableBodyId = listName === 'Addresses' ? 'addressTable' : 'phoneTable';
-            $(`#${tableBodyId} tbody tr`).each(function (i, row) {
-                $(row).find('input, select, textarea').each(function () {
-                    let currentName = $(this).attr('name');
-                    if (currentName) {
-                        let newName = `${listName}[${i}]`;
-                        $(this).attr('name', newName);
-                        
-                        $(this).attr('data-valmsg-for', newName);
-                    }
-                });
+        $(document).ready(function () {
+            
+            $('#addressTable tbody tr').each(function () {
+                toggleDeleteButton(this);
             });
-        }
+
+            
+            $(document).on('input', '.address-input', function () {
+                toggleDeleteButton($(this).closest('tr'));
+            });
+
+            $('#addNewAddressBtn').on('click', function () {
+                let tableBody = $('#addressTable tbody');
+                let lastRow = tableBody.find('tr').last();
+
+                if (lastRow.length > 0) {
+                    let cityInputLast = lastRow.find('input[name$=".CityName"]');
+                    let stateInputLast = lastRow.find('input[name$=".StateName"]');
+                    let pincodeInputLast = lastRow.find('input[name$=".Pincode"]');
+
+                    if (cityInputLast.val().trim() === '' && stateInputLast.val().trim() === '' && pincodeInputLast.val().trim() === '') {
+                        alert('Please fill out the current empty address row before adding a new one.');
+                        return;
+                    }
+                }
+
+                let index = tableBody.find('tr').length;
+
+                let newRowHtml = `
+                    <tr>
+                        <td>
+                            <input type="hidden" name="Clientlist[${index}].AddressId" value="0" />
+                            <input type="hidden" name="Clientlist[${index}].ClientId" value="@Model.Id" />
+                            <input type="text" name="Clientlist[${index}].CityName" class="form-control address-input" placeholder="Enter City" />
+                            <span data-valmsg-for="Clientlist[${index}].CityName" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <input type="text" name="Clientlist[${index}].StateName" class="form-control address-input" placeholder="Enter State" />
+                            <span data-valmsg-for="Clientlist[${index}].StateName" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <input type="text" name="Clientlist[${index}].Pincode" class="form-control address-input" placeholder="Enter Pincode" />
+                            <span data-valmsg-for="Clientlist[${index}].Pincode" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm delete-row-btn" data-address-id="0" style="display:none;">Delete</button>
+                        </td>
+                    </tr>`;
+
+                tableBody.append(newRowHtml);
+                updateRowIndexes(); 
+            });
+
+            $(document).on('click', '.delete-row-btn', function () {
+                let button = $(this);
+                let addressId = button.data('address-id');
+                let rowToDelete = button.closest('tr');
+                let tableBody = $('#addressTable tbody');
+
+                if (addressId > 0) {
+                    if (confirm('Are you sure you want to delete this address permanently?')) {
+                        $.ajax({
+                            url: '@Url.Action("DeleteList", "Client")',
+                            type: 'POST',
+                            data: { addressId: addressId },
+                            headers: {
+                                '__RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    rowToDelete.remove();
+                                    updateRowIndexes();
+                                    if (tableBody.find('tr').length === 0) {
+                                        
+                                        $('#addNewAddressBtn').click(); 
+                                    }
+                                    alert(response.message);
+                                } else {
+                                    alert('Error deleting address: ' + (response.message || 'Unknown error'));
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                alert('An error occurred while deleting the address: ' + error);
+                            }
+                        });
+                    }
+                } else {
+                   
+                    rowToDelete.remove();
+                    updateRowIndexes();
+                    if (tableBody.find('tr').length === 0) {
+                        $('#addNewAddressBtn').click(); 
+                    }
+                }
+            });
+        });
     </script>
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@* @model ClientView
-
-<div class="Contailer shadow">
-    <div class="row">
-        <div class="col-12 text-center mt-3 mb-3">
-            <h2>Create New Client</h2>
-        </div>
-    </div>
-    <form>
-        <div class="mt-1">
-            <label for="Name" class="form-label">Name <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="Name" name="Name" placeholder="Enter Name" asp-for="Name" required>
-        </div>
-        <div class="mt-1">
-            <label for="Email" class="form-label">Name <span class="text-danger">*</span></label>
-            <input type="email" class="form-control" asp-for="Email" id="Email" name="Email" placeholder="Enter Your Email">
-        </div>
-        <div>
-            <label for="Role" class="form-label">Role <span class="text-danger">*</span></label>
-            <select class="form-select" asp-for="Role" id="Role" name="Role" required>
-                <option value="">Select Role</option>
-                <option value="Admin">Employee</option>
-                <option value="User">Client</option>
-            </select>
-        </div>
-        <div>
-            <h3 class="mt-1">Address</h3>
-            <table>
-                <thead>
-                    <tr>
-                        @* <th>Street</th> *@
-                        @* <th>City</th> *@
-                        @* <th>State</th>
-                        <th>Zip Code</th> *@@*
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="Tablebody">
-                    
-                </tbody>
-            </table>
-        </div>
-
-
-        <div class="d-grid gap-2">
-            <button class="btn btn-primary" type="button">Button</button>
-            <a class="btn btn-outline-secondary" asp-action="Index">Button</a>
-        </div>
-    </form>
-</div> *@

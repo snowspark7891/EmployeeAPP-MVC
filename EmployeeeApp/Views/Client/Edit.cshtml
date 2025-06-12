@@ -1,0 +1,296 @@
+﻿@model EmployeeeApp.Models.ClientView
+
+@{
+    ViewData["Title"] = "Edit Client";
+}
+
+<div class="container m-4 shadow-lg rounded-2 p-5">
+    <div class="row">
+        <div class="col-12 text-center mt-3 mb-3">
+            <h2>Edit Client</h2>
+        </div>
+    </div>
+    <form asp-controller="Client" asp-action="Edit" method="post" id="clientForm">
+
+        <input type="hidden" name="__RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+        <input type="hidden" asp-for="Id" id="clientIdHidden" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" asp-for="Name" class="form-control" placeholder="Enter Name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email</label>
+            <input type="email" asp-for="Email" class="form-control" placeholder="Enter Your Email" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label">Role</label>
+            <select asp-for="Role" class="form-select">
+                <option value="">Select Role</option>
+                <option value="Employee">Employee</option>
+                <option value="Client">Client</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
+
+        <h3 class="mt-4">Addresses</h3>
+        <table class="table table-bordered table-sm" id="addressTable">
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Pincode</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Clientlist != null && Model.Clientlist.Any())
+                {
+                    @for (int i = 0; i < Model.Clientlist.Count; i++)
+                    {
+                        <tr data-address-id="@Model.Clientlist[i].AddressId">
+                            <td>
+                                <input type="hidden" name="Clientlist[${i}].AddressId" value="@Model.Clientlist[i].AddressId" />
+                                <input type="hidden" name="Clientlist[${i}].ClientId" value="@Model.Clientlist[i].ClientId" />
+                                <input type="text" asp-for="Clientlist[i].CityName" class="form-control" placeholder="Enter City" />
+                                <span asp-validation-for="Clientlist[i].CityName" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <input type="text" asp-for="Clientlist[i].StateName" class="form-control" placeholder="Enter State" />
+                                <span asp-validation-for="Clientlist[i].StateName" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <input type="text" asp-for="Clientlist[i].Pincode" class="form-control" placeholder="Enter Pincode" />
+                                <span asp-validation-for="Clientlist[i].Pincode" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm delete-address-btn"
+                                        data-address-id="@Model.Clientlist[i].AddressId">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr id="noAddressesRow">
+                        <td colspan="4" class="text-center text-muted">No addresses exist for this client.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="mt-3">
+            <h4>Add New Address</h4>
+            <table class="table table-bordered table-sm" id="newAddressTable">
+                <thead>
+                    <tr>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Pincode</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="text" id="newCityInput" class="form-control form-control-sm" placeholder="Enter City" />
+                        </td>
+                        <td>
+                            <input type="text" id="newStateInput" class="form-control form-control-sm" placeholder="Enter State" />
+                        </td>
+                        <td>
+                            <input type="text" id="newPincodeInput" class="form-control form-control-sm" placeholder="Enter Pincode" />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-success btn-sm" id="addNewAddressBtn">
+                                Add Address
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="addAddressError" class="text-danger mb-3 mt-1" style="display:none;"></div>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mt-3"></div>
+
+        <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-primary" type="submit"> <i class="bi bi-bookmark-check"></i> Save Changes</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function appendAddressRow(addressId, cityName, stateName, pincode) {
+            let tableBody = $('#addressTable tbody');
+            let index = tableBody.find('tr').length;
+
+            if ($('#noAddressesRow').length > 0) {
+                $('#noAddressesRow').remove();
+            }
+
+            let newRowHtml = `
+                <tr data-address-id="${addressId}">
+                    <td>
+                        <input type="hidden" name="Clientlist[${index}].AddressId" value="${addressId}" />
+                        <input type="hidden" name="Clientlist[${index}].ClientId" value="${$('#clientIdHidden').val()}" />
+                        <input type="text" name="Clientlist[${index}].CityName" class="form-control" value="${cityName}" placeholder="Enter City" />
+                        <span data-valmsg-for="Clientlist[${index}].CityName" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <input type="text" name="Clientlist[${index}].StateName" class="form-control" value="${stateName}" placeholder="Enter State" />
+                        <span data-valmsg-for="Clientlist[${index}].StateName" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <input type="text" name="Clientlist[${index}].Pincode" class="form-control" value="${pincode}" placeholder="Enter Pincode" />
+                        <span data-valmsg-for="Clientlist[${index}].Pincode" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm delete-address-btn"
+                                data-address-id="${addressId}">
+                            Delete
+                        </button>
+                    </td>
+                </tr>`;
+
+            tableBody.append(newRowHtml);
+            reparseFormValidation();
+            updateRowIndexes();
+        }
+
+        function updateRowIndexes() {
+            $('#addressTable tbody tr').each(function (i, row) {
+                if ($(this).attr('id') === 'noAddressesRow') {
+                    return true;
+                }
+
+                $(row).find('input[type="hidden"], input[type="text"], span[data-valmsg-for]').each(function () {
+                    let currentName = $(this).attr('name') || $(this).attr('data-valmsg-for');
+                    if (currentName) {
+                        let newName = currentName.replace(/Clientlist\[\d+\]/, `Clientlist[${i}]`);
+                        if ($(this).is('input')) {
+                             $(this).attr('name', newName);
+                             $(this).attr('id', newName.replace(/\[/g, '_').replace(/\]/g, '__'));
+                             $(this).attr('data-valmsg-for', newName);
+                        } else if ($(this).is('span')) {
+                            $(this).attr('data-valmsg-for', newName);
+                        }
+                    }
+                });
+            });
+            reparseFormValidation();
+        }
+
+        function reparseFormValidation() {
+            let form = $('#clientForm');
+            form.removeData('validator');
+            form.removeData('unobtrusiveValidation');
+            $.validator.unobtrusive.parse(form);
+        }
+
+        $(document).ready(function() {
+            const addAddressErrorDiv = $('#addAddressError');
+
+            $('#addNewAddressBtn').on('click', function() {
+                const newCityText = $('#newCityInput').val().trim();
+                const newStateText = $('#newStateInput').val().trim();
+                const newPincodeText = $('#newPincodeInput').val().trim();
+                const clientId = $('#clientIdHidden').val();
+
+                addAddressErrorDiv.hide().text('');
+
+                if (!newCityText) {
+                    addAddressErrorDiv.text('City name is required.').show();
+                    return;
+                }
+                if (!clientId || clientId === "0") {
+                    addAddressErrorDiv.text('Client ID is not available. Please save the client details first or refresh.').show();
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("EditList", "Client")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        clientId: parseInt(clientId),
+                        newAddress: {
+                            CityName: newCityText,
+                            StateName: newStateText,
+                            Pincode: newPincodeText,
+                            AddressId: 0
+                        }
+                    }),
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#newCityInput').val('');
+                            $('#newStateInput').val('');
+                            $('#newPincodeInput').val('');
+                            appendAddressRow(response.addressId, response.cityName, newStateText, newPincodeText);
+                        } else {
+                            addAddressErrorDiv.text('Error adding address: ' + (response.message || 'Unknown error')).show();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        addAddressErrorDiv.text('An error occurred while adding the address. Please try again.').show();
+                    }
+                });
+            });
+
+            $(document).on('click', '.delete-address-btn', function() {
+                const addressId = $(this).data('address-id');
+                const rowToRemove = $(this).closest('tr');
+                const addAddressErrorDiv = $('#addAddressError');
+
+                addAddressErrorDiv.hide().text('');
+
+                if (addressId <= 0) {
+                    addAddressErrorDiv.text('Cannot delete unsaved address or invalid ID. Save the main form first if it\'s a new address.').show();
+                    return;
+                }
+
+                if (confirm('Are you sure you want to delete this address?')) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteList", "Client")',
+                        type: 'POST',
+                        data: { addressId: addressId },
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                rowToRemove.remove();
+                                updateRowIndexes();
+
+                                if ($('#addressTable tbody tr').length === 0) {
+                                    $('#addressTable tbody').append('<tr id="noAddressesRow"><td colspan="4" class="text-center text-muted">No addresses exist for this client.</td></tr>');
+                                }
+                            } else {
+                                addAddressErrorDiv.text('Error deleting address: ' + (response.message || 'Unknown error')).show();
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            addAddressErrorDiv.text('An error occurred while deleting the address. Please try again.').show();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
