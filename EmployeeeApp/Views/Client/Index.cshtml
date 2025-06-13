@@ -21,6 +21,7 @@
                     <th scope="col">Email</th>
                     <th scope="col">Role</th>
                     <th scope="col">Action</th>
+                    <th scope="col" class="text-end">Order</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,8 +32,11 @@
                         <td> <a asp-action="Edit" asp-route-id="@client.Id" class="text-decoration-none">@(client.Email != null ? client.Email : " - ")</a></td>
                         <td> <a asp-action="Edit" asp-route-id="@client.Id" class="text-decoration-none text-black">@(client.Role != null ? client.Role : " - ")</a></td>
                     <td>
-                        
+                          
                         <a asp-action="Delete" asp-route-id="@client.Id" class="btn btn-outline-danger"><i class="bi bi-trash-fill"></i> Delete</a>
+                    </td>
+                    <td class="text-end">
+                            <a asp-controller="Product" asp-action="Index" asp-route-id="@client.Id" class="btn btn-outline-info"><i class="bi bi-bag"></i> Order</a>
                     </td>
                 </tr>
                 }

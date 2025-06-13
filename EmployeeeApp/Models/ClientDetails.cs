@@ -12,8 +12,12 @@
 
         public string? Pincode { get; set; }
 
-        
-        //public string? AddressofClient { get; set; }
+
+
+
+
+
+
 
     }
 }

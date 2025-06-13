@@ -54,8 +54,11 @@
                     {
                         <tr data-address-id="@Model.Clientlist[i].AddressId">
                             <td>
-                                <input type="hidden" name="Clientlist[${i}].AddressId" value="@Model.Clientlist[i].AddressId" />
-                                <input type="hidden" name="Clientlist[${i}].ClientId" value="@Model.Clientlist[i].ClientId" />
+                               
+                                <input type="hidden" name="Clientlist[@i].AddressId" value="@Model.Clientlist[i].AddressId" />
+                                <input type="hidden" name="Clientlist[@i].ClientId" value="@Model.Clientlist[i].ClientId" />
+
+                             
                                 <input type="text" asp-for="Clientlist[i].CityName" class="form-control" placeholder="Enter City" />
                                 <span asp-validation-for="Clientlist[i].CityName" class="text-danger"></span>
                             </td>

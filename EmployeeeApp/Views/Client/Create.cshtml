@@ -68,7 +68,6 @@
                                 <span asp-validation-for="Clientlist[i].Pincode" class="text-danger"></span>
                             </td>
                             <td>
-                               
                                 <button type="button" class="btn btn-danger btn-sm delete-row-btn" data-address-id="@Model.Clientlist[i].AddressId">Delete</button>
                             </td>
                         </tr>
@@ -92,7 +91,6 @@
                             <span data-valmsg-for="Clientlist[0].Pincode" class="text-danger"></span>
                         </td>
                         <td>
-                           
                             <button type="button" class="btn btn-danger btn-sm delete-row-btn" data-address-id="0" style="display:none;">Delete</button>
                         </td>
                     </tr>
@@ -124,6 +122,7 @@
                         let newName = currentName.replace(/Clientlist\[\d+\]/, `Clientlist[${i}]`);
                         if ($(this).is('input') || $(this).is('select') || $(this).is('textarea')) {
                             $(this).attr('name', newName);
+                            $(this).attr('id', newName.replace(/\[/g, '_').replace(/\]/g, '__'));
                             $(this).attr('data-valmsg-for', newName);
                         } else if ($(this).is('span')) {
                             $(this).attr('data-valmsg-for', newName);
@@ -155,12 +154,12 @@
         }
 
         $(document).ready(function () {
-            
+
             $('#addressTable tbody tr').each(function () {
                 toggleDeleteButton(this);
             });
 
-            
+
             $(document).on('input', '.address-input', function () {
                 toggleDeleteButton($(this).closest('tr'));
             });
@@ -204,7 +203,7 @@
                     </tr>`;
 
                 tableBody.append(newRowHtml);
-                updateRowIndexes(); 
+                updateRowIndexes();
             });
 
             $(document).on('click', '.delete-row-btn', function () {
@@ -227,8 +226,7 @@
                                     rowToDelete.remove();
                                     updateRowIndexes();
                                     if (tableBody.find('tr').length === 0) {
-                                        
-                                        $('#addNewAddressBtn').click(); 
+                                        $('#addNewAddressBtn').click();
                                     }
                                     alert(response.message);
                                 } else {
@@ -241,13 +239,29 @@
                         });
                     }
                 } else {
-                   
                     rowToDelete.remove();
                     updateRowIndexes();
                     if (tableBody.find('tr').length === 0) {
-                        $('#addNewAddressBtn').click(); 
+                        $('#addNewAddressBtn').click();
                     }
                 }
+            });
+
+            $('#clientForm').on('submit', function () {
+                $('#addressTable tbody tr').each(function () {
+                    let cityVal = $(this).find('input[name$=".CityName"]').val().trim();
+                    let stateVal = $(this).find('input[name$=".StateName"]').val().trim();
+                    let pincodeVal = $(this).find('input[name$=".Pincode"]').val().trim();
+
+                    if (cityVal === '' && stateVal === '' && pincodeVal === '') {
+                        $(this).remove();
+                    } else {
+                        if (cityVal === '') $(this).find('input[name$=".CityName"]').val('');
+                        if (stateVal === '') $(this).find('input[name$=".StateName"]').val('');
+                        if (pincodeVal === '') $(this).find('input[name$=".Pincode"]').val('');
+                    }
+                });
+                updateRowIndexes();
             });
         });
     </script>

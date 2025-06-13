@@ -181,6 +181,7 @@ namespace EmployeeeApp.Data
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
+
                     using (SqlCommand command = new SqlCommand("Update Client set Name = @Name, Role = @Role, Email = @Email where Id = @Id", connection))
                     {
                         command.Parameters.AddWithValue("@Id", client.Id);
@@ -208,14 +209,7 @@ namespace EmployeeeApp.Data
                             }
                             else
                             {
-                                using (SqlCommand command = new SqlCommand("INSERT INTO ClientDetails (ClientId, CityName, StateName, pincode) VALUES (@ClientId, @CityName, @StateName, @Pincode)", connection))
-                                {
-                                    command.Parameters.AddWithValue("@ClientId", client.Id);
-                                    command.Parameters.AddWithValue("@CityName", string.IsNullOrEmpty(addressDetail.CityName) ? (object)DBNull.Value : addressDetail.CityName);
-                                    command.Parameters.AddWithValue("@StateName", string.IsNullOrEmpty(addressDetail.StateName) ? (object)DBNull.Value : addressDetail.StateName);
-                                    command.Parameters.AddWithValue("@Pincode", string.IsNullOrEmpty(addressDetail.Pincode) ? (object)DBNull.Value : addressDetail.Pincode);
-                                    command.ExecuteNonQuery();
-                                }
+                                Console.WriteLine($"Warning: AddressDetail with AddressId 0 found for ClientId {client.Id}. This should be handled by an insert function.");
                             }
                         }
                         return true;

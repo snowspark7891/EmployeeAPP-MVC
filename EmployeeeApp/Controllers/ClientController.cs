@@ -133,34 +133,7 @@ namespace EmployeeeApp.Controllers
             }
         }
 
-        public ActionResult AddAddress(int clientId, string city)
-        {
-            if (clientId <= 0 || string.IsNullOrWhiteSpace(city))
-            {
-                return Json(new { success = false, message = "Invalid client ID or city provided." });
-            }
-            try
-            {
-                ClientDetails newAddress = new ClientDetails
-                {
-                    ClientId = clientId,
-                    CityName = city
-                };
-                int newAddressId = _clientData.AddAddress(clientId, newAddress);
-                if (newAddressId > 0)
-                {
-                    return Json(new { success = true, addressId = newAddressId, cityName = city });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Failed to add address to the database. No ID returned." });
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = $"An error occurred: {ex.Message}" });
-            }
-        }
+      
 
         public IActionResult Delete(int Id)
         {
