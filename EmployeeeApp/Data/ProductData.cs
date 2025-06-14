@@ -11,6 +11,7 @@ namespace EmployeeeApp.Data
         public ProductData()
         {
             _connectionString = GetConnectionString();
+            
         }
 
       

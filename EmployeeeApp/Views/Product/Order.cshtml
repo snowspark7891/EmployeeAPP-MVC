@@ -1,1 +1,145 @@
-﻿
+﻿@using EmployeeeApp.Data
+@model Order
+@{
+    ClientData data = new ClientData();
+    ClientView client = data.GetById(Model.ClientId);
+    ProductData productData = new ProductData();
+    List<ClientDetails> addresslist = client.Clientlist;
+    List<Product> products = productData.GetProducts();
+    var allproducctJson = Html.Raw(Json.Serialize(products.Select(p => new { p.ProductId, p.ProductName, p.ProductPrice })));
+}
+<div class="container border border-dark shadow">
+    <h2 class="text-start"> You can place your order here , @Model.ClientName</h2>
+
+    <form>
+        <input hidden asp-for="ClientId" value=@Model.ClientId />
+        <input type="hidden" asp-for="OrderDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" /> 
+        <label class="form-label mt-1" for="OrderId">Select the address for delivery<span class="text-danger">*</span> </label>
+      
+        <div class="mb-2">
+            <select asp-for="AddressId" class="form-select">
+                <option value="">Select an Address</option>
+                @if (addresslist.Count() > 0)
+                {
+                    foreach (var address in addresslist)
+                    {
+                        <option value="@address.AddressId">@address.CityName,@address.StateName,@address.Pincode</option>
+                    }
+
+                }
+                else
+                {
+                    <p class="text-center">Client doesn't have any listed address yet please go and add an address for Client !</p>
+                    <a class="btn btn-secondary" asp-rout="Client/Edit/@Model.ClientId">Add</a>
+                }
+            </select>
+            <span asp-validation-for="AddressId" class="text-danger"> </span>
+        </div>
+        
+        
+       
+
+        <div class="mt-2">
+            <table class="table table-bordered table-hover" id="OrderItemsTable">
+                <thead>
+                    <tr>
+                        <th scope="col">
+                            Selected Product
+                        </th>
+                        <th scope="col">
+                            Per Unit Price of the Product(Rs/-)
+                        </th>
+                        <th scope="col">
+                            Quantity of the Product
+                        </th>
+                        <th scope="col">
+                            Total Price for this Purchace
+                        </th>
+                        <th scope="col">
+                            Remove Item
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OrderItems.Count() > 0)
+                    {
+                        for(int i =0; i < Model.OrderItems.Count(); i++)
+                        {
+                            <tr>
+                               
+                                <td>
+                                    <input type="hidden" asp-for="OrderItems[i].OrderId" />
+                                    <select class="form-select-sm" asp-for="@Model.OrderItems[i].productId">
+
+                                        <option value="">Select product</option>
+                                        @if (products.Count() > 0)
+                                        {
+                                            foreach (var product in products)
+                                            {
+                                                <option value="@product.ProductId">@product.ProductName</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" asp-for="OrderItems[i].Unitprice"  class="form-control unitprice" readonly/>
+                                </td>
+                                <td>
+                                    <input type="number" asp-for="OrderItems[i].quantity" class="form-control product-quantity" />                                 </td>
+                            
+                            </tr>
+                        }
+
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>
+                                <input type="hidden" name="OrderItems[0].OrderItemId" value="0" />
+                                <input type="hidden" name="OrderItems[0].OrderId" value="@Model.OrderId" />
+                                <select name="OrderItems[0].productId" class="form-select-sm product-select">
+                                    <option value="">Select product</option>
+                                    @if (products.Any())
+                                    {
+                                        foreach (var product in products)
+                                        {
+                                            <option value="@product.ProductId">@product.ProductName</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td>                             
+                                <input type="text" asp-for="OrderItems[0].Unitprice" class="form-control-sm product-unit-price" readonly placeholder="Unit Price" />
+                            </td>
+                            <td>
+                                <input type="number" name="OrderItems[0].quantity" class="form-control-sm product-quantity" min="1" value="1" placeholder="Quantity" />
+                            </td>
+                            <td>
+                                <input type="text" name="OrderItems[0].TotalPrice" class="form-control-sm product-item-total" readonly placeholder="Total Price" />
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm remove-item-btn" data-order-item-id="0" style="display:none;">Remove</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @Model.ClientName Don't have any Orders yet 
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+            <div class="text-end mb-3">
+                <h3>The Total amount for this Order  </h3><input class="text-end"  asp-for="@Model.TotalPrice" id="Totalprice"/>
+            </div>
+        </div>
+
+        
+
+    </form>
+
+   
+ </div>
+   
+    <a href="/Product/Index" class="btn btn-primary">Back to Products</a>

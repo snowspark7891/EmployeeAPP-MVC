@@ -1,4 +1,6 @@
-﻿namespace EmployeeeApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EmployeeeApp.Models
 {
     public class Order
     {
@@ -8,11 +10,13 @@
 
         public string ClientName { get; set; }
 
+        public DateTime OrderDate { get; set; }
+        [Required(ErrorMessage="You must required an address to place order")]
+       public int AddressId { get; set; }
 
-        public List<ClientDetails> Addresses = new List<ClientDetails>();
 
-        public List<Product> Products = new List<Product>();
-      
-       public decimal TotalPrice { get; set; }
+        public List<OrderItems> OrderItems = new List<OrderItems>();
+
+        public decimal TotalPrice { get; set; }
     }
 }

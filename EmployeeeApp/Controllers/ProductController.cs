@@ -18,5 +18,13 @@ namespace EmployeeeApp.Controllers
            
             return View(product);
         }
+
+        public IActionResult Order(int id) {
+            Order order = new Order
+            {
+                ClientId = id
+            };
+            return View(order);
+        }
     }
 }
