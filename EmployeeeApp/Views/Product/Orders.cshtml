@@ -1,0 +1,124 @@
+﻿@using EmployeeeApp.Data
+@model List<Order>
+@{
+    ClientData data = new ClientData();
+    ProductData productData = new ProductData();
+    List<Product> products = productData.GetProducts();
+}
+
+
+@if (Model != null && Model.Any())
+{
+    <h1>Here are your Orders @Model.First().ClientName</h1>
+    <div class="d-flex justify-content-between mb-2">
+        <a class="btn btn-outline-success btn-sm" asp-action="Order" asp-route-id="@Model.First().ClientId">Add new Order</a>
+        <a class="btn btn-warning btn-sm" asp-controller="Client" asp-action="Index" asp-route-id="@ViewBag.ClientId">Back to List</a>
+    </div>
+
+    <div class="container">
+        <table class="table table-light table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>OrderId</th>
+                    <th>Order Address</th>
+                    <th>Total Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    var modalId = $"orderModal_{order.OrderId}";
+                    var address = data.GetClientDetailsById(order.AddressId);
+                    string fullAddress = $"{address.CityName}, {address.StateName}, {address.Pincode}";
+
+                    <tr>
+                        <td>@order.OrderId</td>
+                        <td>@fullAddress</td>
+                        <td>@order.TotalPrice Rs/-</td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#@modalId">
+                                View
+                            </button>
+                            <form asp-action="CancelOrder" asp-route-orderId="@order.OrderId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Move modal outside of tbody -->
+                }
+            </tbody>
+        </table>
+
+        @foreach (var order in Model)
+        {
+            var modalId = $"orderModal_{order.OrderId}";
+            var address = data.GetClientDetailsById(order.AddressId);
+            string fullAddress = $"{address.CityName}, {address.StateName}, {address.Pincode}";
+
+            <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="modalLabel_@order.OrderId" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalLabel_@order.OrderId">Order #@order.OrderId Details</h5>
+                         
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Client:</strong> @order.ClientName</p>
+                            <p><strong>Address:</strong> @fullAddress</p>
+                            <p><strong>Total Price:</strong> @order.TotalPrice Rs</p>
+
+                            <table class="table table-bordered table-sm mt-3">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th>Order Item ID</th>
+                                        <th>Product ID</th>
+                                        <th>Product Name</th>
+                                        <th>Quantity</th>
+                                        <th>Total Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in order.OrderItems)
+                                    {
+                                        var product = products.FirstOrDefault(p => p.ProductId == item.productId);
+                                        <tr>
+                                            <td>@item.OrderItemId</td>
+                                            <td>@item.productId</td>
+                                            <td>@(product?.ProductName ?? "N/A")</td>
+                                            <td>@item.quantity</td>
+                                            <td>@item.TotalPrice</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                             <a asp-action="PrintInvoice" asp-route-orderId="@order.OrderId" class="btn btn-outline-success" >Download Invoice</a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <h1>No Orders Found</h1>
+    @if (ViewBag.ClientId != null)
+    {
+        <div class="d-flex justify-content-between">
+            <a class="btn btn-outline-dark mb-3" asp-action="Order" asp-route-id="@ViewBag.ClientId">Add new Order</a>
+            <a class="btn btn-outline-secondary mb-3" asp-controller="Client" asp-action="Index" asp-route-id="@ViewBag.ClientId">Back to List</a>
+        </div>
+    }
+}
+
+
+
+
+
+
+

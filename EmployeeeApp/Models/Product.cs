@@ -11,8 +11,6 @@
        
         public int CategoryId { get; set; }
 
-        public int? ProductQuntity { get; set; }
-        public int?  ProductTotal { get; set; }   
-
+       
     }
 }

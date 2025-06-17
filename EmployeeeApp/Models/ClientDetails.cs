@@ -3,7 +3,7 @@
     public class ClientDetails
     {
         public int AddressId { get; set; }
-
+        
         public int? ClientId { get; set; }
 
         public string? CityName { get; set; }

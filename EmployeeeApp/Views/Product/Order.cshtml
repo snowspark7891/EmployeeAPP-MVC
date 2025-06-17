@@ -4,92 +4,89 @@
     ClientData data = new ClientData();
     ClientView client = data.GetById(Model.ClientId);
     ProductData productData = new ProductData();
-    List<ClientDetails> addresslist = client.Clientlist;
+    List<ClientDetails> addresslist = client?.Clientlist ?? new List<ClientDetails>();
     List<Product> products = productData.GetProducts();
     var allproducctJson = Html.Raw(Json.Serialize(products.Select(p => new { p.ProductId, p.ProductName, p.ProductPrice })));
 }
-<div class="container border border-dark shadow">
-    <h2 class="text-start"> You can place your order here , @Model.ClientName</h2>
 
-    <form>
-        <input hidden asp-for="ClientId" value=@Model.ClientId />
-        <input type="hidden" asp-for="OrderDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" /> 
-        <label class="form-label mt-1" for="OrderId">Select the address for delivery<span class="text-danger">*</span> </label>
-      
+<div class="container border border-light shadow p-4">
+    <h2 class="text-start">@Model.ClientName, You can place your order here</h2>
+
+    <form id="orderForm" asp-controller="Product" asp-action="PlaceOrder" method="post">
+        <input hidden asp-for="ClientId" value="@Model.ClientId" />
+
+        <label class="form-label mt-1" for="AddressId">Select the address for delivery<span class="text-danger">*</span></label>
+
         <div class="mb-2">
             <select asp-for="AddressId" class="form-select">
                 <option value="">Select an Address</option>
-                @if (addresslist.Count() > 0)
+                @if (addresslist.Any())
                 {
                     foreach (var address in addresslist)
                     {
-                        <option value="@address.AddressId">@address.CityName,@address.StateName,@address.Pincode</option>
+                        <option value="@address.AddressId">@address.CityName, @address.StateName, @address.Pincode</option>
                     }
-
                 }
                 else
                 {
-                    <p class="text-center">Client doesn't have any listed address yet please go and add an address for Client !</p>
-                    <a class="btn btn-secondary" asp-rout="Client/Edit/@Model.ClientId">Add</a>
+                    <option disabled>Client doesn't have any listed address yet.
+                    
+                    </option>
                 }
             </select>
-            <span asp-validation-for="AddressId" class="text-danger"> </span>
+            <span asp-validation-for="AddressId" class="text-danger"></span>
+            @if (!addresslist.Any())
+            {
+               <div class="text-center">
+                    <p class="text-center mt-2"><span class="text-danger">Looks like This Client doesn't have any Listed Address yet .</span>Please add an address for the client!</p>
+                    <a class="btn btn-secondary" asp-controller="Client" asp-action="Edit" asp-route-id="@Model.ClientId">Add Address</a>
+               </div>
+            }
         </div>
-        
-        
-       
 
         <div class="mt-2">
-            <table class="table table-bordered table-hover" id="OrderItemsTable">
+            <table class="table table-bordered table-hover" id="orderItemsTable">
                 <thead>
                     <tr>
-                        <th scope="col">
-                            Selected Product
-                        </th>
-                        <th scope="col">
-                            Per Unit Price of the Product(Rs/-)
-                        </th>
-                        <th scope="col">
-                            Quantity of the Product
-                        </th>
-                        <th scope="col">
-                            Total Price for this Purchace
-                        </th>
-                        <th scope="col">
-                            Remove Item
-                        </th>
+                        <th scope="col">Selected Product</th>
+                        <th scope="col">Per Unit Price (Rs/-)</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total Price for this Purchase</th>
+                        <th scope="col">Remove Item</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.OrderItems.Count() > 0)
+                    @if (Model.OrderItems != null && Model.OrderItems.Any())
                     {
-                        for(int i =0; i < Model.OrderItems.Count(); i++)
+                        for (int i = 0; i < Model.OrderItems.Count(); i++)
                         {
                             <tr>
-                               
                                 <td>
                                     <input type="hidden" asp-for="OrderItems[i].OrderId" />
-                                    <select class="form-select-sm" asp-for="@Model.OrderItems[i].productId">
-
+                                    <select asp-for="OrderItems[i].productId" class="form-select-sm product-select">
                                         <option value="">Select product</option>
-                                        @if (products.Count() > 0)
+                                        @foreach (var product in products)
                                         {
-                                            foreach (var product in products)
-                                            {
-                                                <option value="@product.ProductId">@product.ProductName</option>
-                                            }
+                                            <option value="@product.ProductId">@product.ProductName</option>
                                         }
                                     </select>
+                                    <span asp-validation-for="OrderItems[i].productId" class="text-danger"></span>
                                 </td>
                                 <td>
-                                    <input type="text" asp-for="OrderItems[i].Unitprice"  class="form-control unitprice" readonly/>
+                                    <input type="text" asp-for="OrderItems[i].Unitprice" class="form-control-sm product-unit-price" readonly />
                                 </td>
                                 <td>
-                                    <input type="number" asp-for="OrderItems[i].quantity" class="form-control product-quantity" />                                 </td>
-                            
+                                    <input type="number" asp-for="OrderItems[i].quantity" class="form-control-sm product-quantity" min="1" value="0" />
+                                    <span asp-validation-for="OrderItems[i].quantity" class="text-danger"></span>
+                                </td>
+                                <td>
+                                    <input type="text" asp-for="OrderItems[i].TotalPrice" class="form-control-sm product-item-total" readonly />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm remove-item-btn" data-order-item-id="@Model.OrderItems[i].OrderItemId">Remove</button>
+                                </td>
                             </tr>
                         }
-
                     }
                     else
                     {
@@ -97,7 +94,7 @@
                             <td>
                                 <input type="hidden" name="OrderItems[0].OrderItemId" value="0" />
                                 <input type="hidden" name="OrderItems[0].OrderId" value="@Model.OrderId" />
-                                <select name="OrderItems[0].productId" class="form-select-sm product-select">
+                                <select name="OrderItems[0].productId" id="OrderItems_0__productId" class="form-select-sm product-select">
                                     <option value="">Select product</option>
                                     @if (products.Any())
                                     {
@@ -107,39 +104,312 @@
                                         }
                                     }
                                 </select>
-                            </td>
-                            <td>                             
-                                <input type="text" asp-for="OrderItems[0].Unitprice" class="form-control-sm product-unit-price" readonly placeholder="Unit Price" />
+                                <span class="text-danger" data-valmsg-for="OrderItems[0].productId"></span>
                             </td>
                             <td>
-                                <input type="number" name="OrderItems[0].quantity" class="form-control-sm product-quantity" min="1" value="1" placeholder="Quantity" />
+                                <input type="text" name="OrderItems[0].Unitprice" id="OrderItems_0__Unitprice" class="form-control-sm product-unit-price" readonly placeholder="Unit Price" />
                             </td>
                             <td>
-                                <input type="text" name="OrderItems[0].TotalPrice" class="form-control-sm product-item-total" readonly placeholder="Total Price" />
+                                <input type="number" name="OrderItems[0].quantity" id="OrderItems_0__quantity" class="form-control-sm product-quantity" min="1" value="1" placeholder="Quantity" />
+                                <span class="text-danger" data-valmsg-for="OrderItems[0].quantity"></span>
+                            </td>
+                            <td>
+                                <input type="text" name="OrderItems[0].TotalPrice" id="OrderItems_0__TotalPrice" class="form-control-sm product-item-total" readonly placeholder="Total Price" />
                             </td>
                             <td>
                                 <button type="button" class="btn btn-danger btn-sm remove-item-btn" data-order-item-id="0" style="display:none;">Remove</button>
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                                @Model.ClientName Don't have any Orders yet 
-                            </td>
-                        </tr>
-
                     }
                 </tbody>
             </table>
+            <button type="button" id="addOrderItemBtn" class="btn btn-success btn-sm mb-3">Add Product</button>
             <div class="text-end mb-3">
-                <h3>The Total amount for this Order  </h3><input class="text-end"  asp-for="@Model.TotalPrice" id="Totalprice"/>
+                <h3>The Total amount for this Order: <input class="text-end" asp-for="TotalPrice" id="OverallTotalPrice" readonly /></h3>
             </div>
         </div>
 
-        
-
+    
+        <div class="d-grid gap-2 mt-4 mb-3">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-bag"></i> Place Order</button>
+            <a class="btn btn-outline-secondary" asp-controller="Client" asp-action="Index">Cancel</a>
+        </div>
     </form>
 
    
- </div>
-   
-    <a href="/Product/Index" class="btn btn-primary">Back to Products</a>
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        const allProducts = @allproducctJson;
+
+        function calculateRowTotal($row) {
+            const selectedProductId = $row.find('.product-select').val();
+            let quantity = parseInt($row.find('.product-quantity').val());
+            const $unitPriceInput = $row.find('.product-unit-price');
+            const $itemTotalPriceInput = $row.find('.product-item-total');
+            const $removeBtn = $row.find('.remove-item-btn');
+
+            let unitPrice = 0;
+
+            if (isNaN(quantity) || quantity < 1) {
+                quantity = 1;
+                $row.find('.product-quantity').val(1);
+            }
+
+            if (selectedProductId) {
+                const selectedProductIdNum = parseInt(selectedProductId, 10);
+                const product = allProducts.find(p => p.productId === selectedProductIdNum);
+
+                if (product) {
+                    unitPrice = product.productPrice;
+                    $unitPriceInput.val(unitPrice.toFixed(2));
+                } else {
+                    $unitPriceInput.val('N/A');
+                }
+            } else {
+                $unitPriceInput.val('');
+            }
+
+            let itemTotal = 0;
+            if (unitPrice > 0 && quantity > 0) {
+                itemTotal = quantity * unitPrice;
+                $itemTotalPriceInput.val(itemTotal.toFixed(2));
+            } else {
+                $itemTotalPriceInput.val('');
+            }
+
+            if ($('#orderItemsTable tbody tr').length > 1) {
+                $removeBtn.show();
+            } else {
+                if ($('#orderItemsTable tbody tr').length === 1 && !selectedProductId && (isNaN(quantity) || quantity < 1) && unitPrice === 0) {
+                    $removeBtn.hide();
+                } else {
+                    $removeBtn.show();
+                }
+            }
+            updateOverallTotal();
+        }
+
+        function updateOverallTotal() {
+            let overallTotal = 0;
+            $('#orderItemsTable tbody .product-item-total').each(function () {
+                const itemTotal = parseFloat($(this).val());
+                if (!isNaN(itemTotal)) {
+                    overallTotal += itemTotal;
+                }
+            });
+            $('#OverallTotalPrice').val(overallTotal.toFixed(2));
+        }
+
+        function updateRowIndexes() {
+            $('#orderItemsTable tbody tr').each(function (i, row) {
+                $(row).find('input, select, span[data-valmsg-for]').each(function () {
+                    let currentName = $(this).attr('name') || $(this).attr('data-valmsg-for');
+                    if (currentName && currentName.startsWith('OrderItems[')) {
+                        let newName = currentName.replace(/OrderItems\[\d+\]/, `OrderItems[${i}]`);
+                        if ($(this).is('input') || $(this).is('select')) {
+                            $(this).attr('name', newName);
+                            $(this).attr('id', `OrderItems_${i}__${newName.split('.').pop()}`);
+                        } else if ($(this).is('span')) {
+                            $(this).attr('data-valmsg-for', newName);
+                        }
+                    }
+                });
+            });
+            reparseFormValidation();
+        }
+
+        function reparseFormValidation() {
+            let form = $('#orderForm');
+            form.removeData('validator');
+            form.removeData('unobtrusiveValidation');
+            $.validator.unobtrusive.parse(form);
+        }
+
+        $(document).ready(function () {
+            $('#orderItemsTable tbody tr').each(function() {
+                calculateRowTotal($(this));
+            });
+            updateOverallTotal();
+
+            $(document).on('change', '.product-select', function () {
+                calculateRowTotal($(this).closest('tr'));
+            });
+
+            $(document).on('input', '.product-quantity', function () {
+                calculateRowTotal($(this).closest('tr'));
+            });
+
+            $('#addOrderItemBtn').on('click', function () {
+                let tableBody = $('#orderItemsTable tbody');
+                let actualOrderRows = tableBody.find('tr').filter(function() {
+                    return $(this).find('.product-select').length > 0;
+                });
+
+                if (actualOrderRows.length > 0) {
+                    let lastActualRow = actualOrderRows.last();
+                    const lastRowProductId = lastActualRow.find('.product-select').val();
+                    const lastRowQuantity = parseInt(lastActualRow.find('.product-quantity').val());
+
+                    if (!lastRowProductId || isNaN(lastRowQuantity) || lastRowQuantity < 1) {
+                        alert('Please select a product and/or enter a quantity for the last item before adding a new one.');
+                        return;
+                    }
+                } else {
+                    let placeholderRow = tableBody.find('tr').filter(function() {
+                        return $(this).find('td[colspan="5"]').length > 0;
+                    });
+                    if (placeholderRow.length > 0) {
+                        placeholderRow.remove();
+                    }
+                }
+
+                let index = tableBody.find('tr').length;
+                let newRowHtml = `
+                    <tr>
+                        <td>
+                            <input type="hidden" name="OrderItems[${index}].OrderItemId" value="0" />
+                            <input type="hidden" name="OrderItems[${index}].OrderId" value="@Model.OrderId" />
+                            <select name="OrderItems[${index}].productId" id="OrderItems_${index}__productId" class="form-select-sm product-select">
+                                <option value="">Select product</option>
+                                @if (products.Any())
+                                {
+                                        foreach (var product in products)
+                                        {
+                                                <option value="@product.ProductId">@product.ProductName</option>
+                                        }
+                                }
+                            </select>
+                            <span class="text-danger" data-valmsg-for="OrderItems[${index}].productId"></span>
+                        </td>
+                        <td>
+                            <input type="text" name="OrderItems[${index}].Unitprice" id="OrderItems_${index}__Unitprice" class="form-control-sm product-unit-price" readonly placeholder="Unit Price" />
+                        </td>
+                        <td>
+                            <input type="number" name="OrderItems[${index}].quantity" id="OrderItems_${index}__quantity" class="form-control-sm product-quantity" min="1" value="1" placeholder="Quantity" />
+                            <span class="text-danger" data-valmsg-for="OrderItems[${index}].quantity"></span>
+                        </td>
+                        <td>
+                            <input type="text" name="OrderItems[${index}].TotalPrice" id="OrderItems_${index}__TotalPrice" class="form-control-sm product-item-total" readonly placeholder="Total Price" />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm remove-item-btn" data-order-item-id="0">Remove</button>
+                        </td>
+                    </tr>`;
+                tableBody.append(newRowHtml);
+                updateRowIndexes();
+                calculateRowTotal(tableBody.find('tr').last());
+            });
+
+            $(document).on('click', '.remove-item-btn', function () {
+                let button = $(this);
+                let rowToDelete = button.closest('tr');
+                let tableBody = $('#orderItemsTable tbody');
+
+                rowToDelete.remove();
+                updateRowIndexes();
+
+                if (tableBody.find('tr').length === 0) {
+                    let emptyRowHtml = `
+                        <tr>
+                            <td>
+                                <input type="hidden" name="OrderItems[0].OrderItemId" value="0" />
+                                <input type="hidden" name="OrderItems[0].OrderId" value="@Model.OrderId" />
+                                <select name="OrderItems[0].productId" id="OrderItems_0__productId" class="form-select-sm product-select">
+                                    <option value="">Select product</option>
+                                    @if (products.Any())
+                                    {
+                                            foreach (var product in products)
+                                            {
+                                                    <option value="@product.ProductId">@product.ProductName</option>
+                                            }
+                                    }
+                                </select>
+                                <span class="text-danger" data-valmsg-for="OrderItems[0].productId"></span>
+                            </td>
+                            <td>
+                                <input type="text" name="OrderItems[0].Unitprice" id="OrderItems_0__Unitprice" class="form-control-sm product-unit-price" readonly placeholder="Unit Price" />
+                            </td>
+                            <td>
+                                <input type="number" name="OrderItems[0].quantity" id="OrderItems_0__quantity" class="form-control-sm product-quantity" min="1" value="1" placeholder="Quantity" />
+                                <span class="text-danger" data-valmsg-for="OrderItems[0].quantity"></span>
+                            </td>
+                            <td>
+                                <input type="text" name="OrderItems[0].TotalPrice" id="OrderItems_0__TotalPrice" class="form-control-sm product-item-total" readonly placeholder="Total Price" />
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm remove-item-btn" data-order-item-id="0" style="display:none;">Remove</button>
+                            </td>
+                        </tr>`;
+                    tableBody.append(emptyRowHtml);
+                    tableBody.find('.remove-item-btn').last().hide();
+                }
+                updateOverallTotal();
+            });
+
+            $('#orderForm').on('submit', function (e) {
+                let isValid = true;
+                let actualOrderRows = $('#orderItemsTable tbody tr').filter(function() {
+                    return $(this).find('.product-select').length > 0;
+                });
+
+                if (actualOrderRows.length === 0) {
+                    isValid = false;
+                    alert('Please add at least one product to your order.');
+                    e.preventDefault();
+                    return;
+                }
+
+                actualOrderRows.each(function () {
+                    const $row = $(this);
+                    const selectedProductId = $row.find('.product-select').val();
+                    const quantity = parseInt($row.find('.product-quantity').val());
+
+                    const $productErrorSpan = $row.find('span[data-valmsg-for$="productId"]');
+                    const $quantityErrorSpan = $row.find('span[data-valmsg-for$="quantity"]');
+
+                    $productErrorSpan.empty();
+                    $quantityErrorSpan.empty();
+
+                    if (!selectedProductId) {
+                        isValid = false;
+                        $productErrorSpan.text('Product is required.');
+                    }
+
+                    if (isNaN(quantity) || quantity < 1) {
+                        isValid = false;
+                        $quantityErrorSpan.text('Quantity must be a positive number.');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    $('html, body').animate({
+                        scrollTop: $('#orderForm').offset().top
+                    }, 500);
+                } else {
+                    $('#orderItemsTable tbody tr').filter(function() {
+                        return $(this).find('td[colspan="5"]').length > 0;
+                    }).remove();
+
+                    $('#orderItemsTable tbody tr').each(function () {
+                        const $row = $(this);
+                        const selectedProductId = $row.find('.product-select').val();
+                        const quantity = parseInt($row.find('.product-quantity').val());
+
+                        if (!selectedProductId && (isNaN(quantity) || quantity < 1)) {
+                            $row.remove();
+                        }
+                    });
+                    updateRowIndexes();
+                    updateOverallTotal();
+                }
+            });
+        });
+    </script>
+}

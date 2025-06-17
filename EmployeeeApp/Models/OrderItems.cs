@@ -10,7 +10,7 @@
 
 
        
-     public decimal Unitprice { get; set; }
+       public decimal? Unitprice { get; set; }
      
         public int quantity { get; set; }
 
