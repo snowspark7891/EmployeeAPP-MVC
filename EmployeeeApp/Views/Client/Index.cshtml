@@ -2,25 +2,30 @@
 
 @model List<ClientView>
 @{
-    ProductData data = new ProductData();
-    List<Order> Ordercount = new List<Order>();
+    ProductData data = new ProductData(); // Used to get Ordercount
+    // ClientData clientData = new ClientData(); // Not directly used in this snippet's top level, but for addresses later
+    List<Order> Ordercount = new List<Order>(); // Used locally in loop for display
 }
 
 <div>
-
     <div class="row mt-3">
         <div class="col-6 text-start">
             <h2>Client List</h2>
         </div>
-        <div class="col-6 text-end">
-            <a asp-action="Create" class="btn btn-outline-primary"><i class="bi bi-person-plus-fill"></i>  Create New Client</a>
+        <div class="col-6 text-end d-flex justify-content-end align-items-center">
+          
+            <a asp-action="Create" class="btn btn-outline-primary me-2"><i class="bi bi-person-plus-fill"></i> Create New Client</a>
+
+            <a asp-controller="Product" asp-action="ExportClientsToExcel" class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-excel-fill"></i> Export Client List
+            </a>
+          
         </div>
     </div>
 
-     <div>
-        
-            <table class="table table-light table-bordered table-hover">
-                <thead>
+    <div>
+        <table class="table table-light table-bordered table-hover">
+            <thead>
                 <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Email</th>
@@ -32,39 +37,40 @@
             <tbody>
                 @foreach (var client in Model)
                 {
-                <tr>
-                        <td><a asp-action="Edit" asp-route-id="@client.Id" class="text-decoration-none text-black"><i class="bi bi-pencil-square"></i>&nbsp;&nbsp;@client.Name   </a></td>
+                    <tr>
+                        <td><a asp-action="Edit" asp-route-id="@client.Id" class="text-decoration-none text-black"><i class="bi bi-pencil-square"></i>&nbsp;&nbsp;@client.Name </a></td>
                         <td> <a asp-action="Edit" asp-route-id="@client.Id" class="text-decoration-none">@(client.Email != null ? client.Email : " - ")</a></td>
                         <td> <a asp-action="Edit" asp-route-id="@client.Id" class="text-decoration-none text-black">@(client.Role != null ? client.Role : " - ")</a></td>
-                    <td>
-                          
-                        <a asp-action="Delete" asp-route-id="@client.Id" class="btn btn-outline-danger"><i class="bi bi-trash-fill"></i> Delete</a>
-                    </td>
-                    <td class="text-center">
-                            @{
-                                Ordercount = data.OrderForId(client.Id);
+                        <td>
 
+                            <a asp-action="Delete" asp-route-id="@client.Id" class="btn btn-outline-danger"><i class="bi bi-trash-fill"></i> Delete</a>
+                        </td>
+                        <td class="text-center">
+                            @{
+                                Ordercount = data.OrderForId(client.Id); // This method should ideally be in ClientData
+                                                                         // but retaining current logic based on your provided code.
+                                                                         // For optimal performance, fetch all order counts in the controller
+                                                                         // and pass them via a ViewModel.
                             }
-                          
-                                @if (Ordercount.Count > 0)
-                                {
-                                   <a asp-controller="Product" asp-action="Orders" asp-route-id="@client.Id" class="btn btn-outline-info">
+
+                            @if (Ordercount != null && Ordercount.Count > 0)
+                            {
+                                <a asp-controller="Product" asp-action="Orders" asp-route-id="@client.Id" class="btn btn-outline-info">
                                     <i class="bi bi-bag"></i> Orders <span class="badge text-bg-primary rounded-pill">@Ordercount.Count</span>
-                                   </a>
-                                }
-                                else
-                                {
+                                </a>
+                            }
+                            else
+                            {
                                 <a asp-controller="Product" asp-action="Orders" asp-route-id="@client.Id" class="btn btn-outline-info">
                                     <i class="bi bi-bag"> Orders </i>
                                 </a>
-                                }
+                            }
 
-                           
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
-        
-     </div>
+
+    </div>
 </div>

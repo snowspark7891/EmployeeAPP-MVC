@@ -11,8 +11,13 @@
 {
     <h1>Here are your Orders @Model.First().ClientName</h1>
     <div class="d-flex justify-content-between mb-2">
-        <a class="btn btn-outline-success btn-sm" asp-action="Order" asp-route-id="@Model.First().ClientId">Add new Order</a>
-        <a class="btn btn-warning btn-sm" asp-controller="Client" asp-action="Index" asp-route-id="@ViewBag.ClientId">Back to List</a>
+        <a class="btn btn-outline-success btn-sm me-2" asp-action="Order" asp-route-id="@Model.First().ClientId">Add new Order</a>
+     
+
+        <a class="btn btn-info btn-sm" asp-controller="Product" asp-action="ExportClientOrdersToExcel" asp-route-clientId="@ViewBag.ClientId">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Export Orders
+        </a>
+       
     </div>
 
     <div class="container">
@@ -62,7 +67,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="modalLabel_@order.OrderId">Order #@order.OrderId Details</h5>
-                         
+
                         </div>
                         <div class="modal-body">
                             <p><strong>Client:</strong> @order.ClientName</p>
@@ -95,14 +100,17 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                             <a asp-action="PrintInvoice" asp-route-orderId="@order.OrderId" class="btn btn-outline-success" >Download Invoice</a>
+                            <a asp-action="PrintInvoice" asp-route-orderId="@order.OrderId" class="btn btn-outline-success" >Download Invoice</a>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
         }
+
+           <a class="btn btn-warning btn-sm me-2" asp-controller="Client" asp-action="Index" asp-route-id="@ViewBag.ClientId">Back to List</a>
     </div>
+
 }
 else
 {
@@ -115,10 +123,3 @@ else
         </div>
     }
 }
-
-
-
-
-
-
-
