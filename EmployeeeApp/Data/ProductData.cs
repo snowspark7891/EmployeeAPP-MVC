@@ -46,7 +46,7 @@ namespace EmployeeeApp.Data
                             ProductName = reader.GetString(1),
                             ProductPrice = reader.GetDecimal(2),
 
-                            CategoryId = reader.GetInt32(3)
+                           
                         };
                         products.Add(product);
                     }
@@ -285,6 +285,48 @@ namespace EmployeeeApp.Data
                 throw new Exception("Cannot get the order details: " + ex.Message);
             }
         }
+
+
+
+
+        public bool InsertProduct(Product product)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand("Insert into Products (ProductName,ProductPrice) values (@ProductName,@ProductPrice);", connection))
+                    {
+                        command.Parameters.AddWithValue("@ProductName", product.ProductName);
+                        command.Parameters.AddWithValue("@ProductPrice", product.ProductPrice);
+                        int result = (int)command.ExecuteNonQuery();
+                        return result > 0;
+                    } ;
+                    
+
+
+                }
+                
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Error in  product Insertion " + ex.Message);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     }

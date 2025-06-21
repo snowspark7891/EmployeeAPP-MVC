@@ -81,6 +81,69 @@ namespace EmployeeeApp.Controllers
             return View(list);
         }
 
+        public IActionResult CreateProduct()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CrerateProduct(Product product)
+        {
+            if (ModelState.IsValid) 
+            {
+                if (_productData.InsertProduct(product))
+                {
+                    return RedirectToAction("ProductList");             //33333333333333333333333333333333333333
+                }
+                else
+                {
+                    return View();
+                }
+            }
+            return View();
+        }
+
+        //public IActionResult EditProduct(int ProductId)
+        //{
+        //    Product product = _productData.GetByProductId(ProductId);
+        //    return View(product);
+        //}
+
+        //[HttpPost]
+        //public IActionResult EditProduct(Product product)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        if (_productData.UpdateProduct(product))
+        //        {
+        //            return RedirectToAction("ProductList");             //33333333333333333333333333333333333333
+        //        }
+        //        else
+        //        {
+        //            return View();
+        //        }
+        //    }
+        //    return View();
+        //}
+
+
+        //[HttpPost]
+        //public IActionResult DeleteProduct(int ProductId)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        if (_productData.DeleteProduct(product))
+        //        {
+        //            return RedirectToAction("ProductList");             //33333333333333333333333333333333333333
+        //        }
+             
+        //    }
+        //    return NotFound();
+        //}
+
+
+
+
         public IActionResult PrintInvoice(int OrderId)
         {
            var orderl = _productData.GetOrder(OrderId);
@@ -94,10 +157,23 @@ namespace EmployeeeApp.Controllers
                     Document doc = new Document(PageSize.A4);
                     PdfWriter.GetInstance(doc, stream);
                     doc.Open();
+
+                    string imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.jpg");
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        var logo = Image.GetInstance(imagePath);
+                        logo.ScaleToFit(100f, 100f);
+                        logo.Alignment = Element.ALIGN_LEFT;
+                        doc.Add(logo);
+                    }
+
+
                     doc.Add(new Paragraph($"Invoice for Order # {OrderId}"));
                     doc.Add(new Paragraph($"Order for {orderl.Name}"));
                     doc.Add(new Paragraph($"Delivery Address {address.CityName},{address.StateName},{address.Pincode}"));
-                    doc.Add(new Paragraph($"Total price Of the Order : {orderl.order.TotalPrice}"));
+                    doc.Add(new Paragraph($"Total price Of the Order {orderl.order.TotalPrice}  Rs/- "));
+                    
+                   
                     doc.Add(new Paragraph(" "));
 
                     PdfPTable table = new PdfPTable(5);
