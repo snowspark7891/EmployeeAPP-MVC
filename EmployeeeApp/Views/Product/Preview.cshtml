@@ -1,0 +1,77 @@
+﻿@using EmployeeeApp.Data
+@model Orderlist
+
+
+@{
+    ProductData productData = new ProductData();
+    List<Product> products = productData.GetProducts();
+}
+
+<h2>Preview of Invoice </h2>
+
+<div class="d-grid gap-2 d-md-flex justify-content-md-end">
+    <a asp-action="PrintInvoice" asp-route-orderId="@Model.order.OrderId" class="btn btn-outline-danger btn-sm"><i class="bi bi-filetype-pdf"></i> Download as pdf</a>
+    <a class="btn btn-outline-success btn-sm" asp-controller="Product" asp-action="ExportInvoiceToExcel" asp-route-orderId="@Model.order.OrderId">
+        <i class="bi bi-file-earmark-spreadsheet"></i> Export as Excel
+    </a>
+    <a class="btn btn-outline-primary btn-sm" asp-controller="Product" asp-action="ExportInvoiceToWord" asp-route-orderId="@Model.order.OrderId">
+        <i class="bi bi-file-earmark-word-fill"></i> Export as Word
+    </a>
+    
+</div>
+<div class="container shadow">
+
+
+    <div>
+        <img src="~/images/logo.jpg" class="img-fluid" alt="Preview Image">
+    </div>
+
+    <h3>Invoice for Order #@Model.order.OrderId</h3>
+  
+
+ <div>
+     <h2>Order for @Model.Name</h2>
+        <h5>
+            Delivery Address : @Model.City @Model.State, @Model.PinCode
+        </h5>
+        <h5>
+            Total Price : <strong>@Model.order.TotalPrice</strong> Rs/-
+        </h5>
+        
+ </div>
+    <div>
+        <h6> Order summry</h6>
+        <table class="table table-light table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Order Item ID</th>
+                    <th scope="col">Product ID</th>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Total price for the Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.order.OrderItems)
+                {
+                    <tr>
+                      @{  var product = products.FirstOrDefault(p => p.ProductId == item.productId);}
+                        <td>@item.OrderItemId</td>
+                        <td>@item.productId</td>
+                        <td>@(product?.ProductName ?? "N/A")</td>
+                        <td>@item.quantity</td>
+                        <td>@item.Unitprice Rs/-</td>
+                       
+                        <td>@item.TotalPrice Rs/-</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="d-grid gap-2 mt-4">
+       
+        <a class="btn btn-warning" asp-controller="Product" asp-action="Orders" asp-route-id="@Model.order.ClientId">  <i class="bi bi-arrow-left"></i>Go back</a>
+    </div>
+
+</div>

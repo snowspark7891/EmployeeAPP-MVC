@@ -2,9 +2,8 @@
 
 @model List<ClientView>
 @{
-    ProductData data = new ProductData(); // Used to get Ordercount
-    // ClientData clientData = new ClientData(); // Not directly used in this snippet's top level, but for addresses later
-    List<Order> Ordercount = new List<Order>(); // Used locally in loop for display
+    ProductData data = new ProductData(); 
+    List<Order> Ordercount = new List<Order>(); 
 }
 
 <div>
@@ -17,7 +16,7 @@
             <a asp-action="Create" class="btn btn-outline-primary me-2"><i class="bi bi-person-plus-fill"></i> Create New Client</a>
 
             <a asp-controller="Product" asp-action="ExportClientsToExcel" class="btn btn-outline-success">
-                <i class="bi bi-file-earmark-excel-fill"></i> Export Client List
+                <i class="bi bi-file-earmark-excel-fill"></i> Export Client List As Exc
             </a>
           
         </div>
@@ -47,10 +46,7 @@
                         </td>
                         <td class="text-center">
                             @{
-                                Ordercount = data.OrderForId(client.Id); // This method should ideally be in ClientData
-                                                                         // but retaining current logic based on your provided code.
-                                                                         // For optimal performance, fetch all order counts in the controller
-                                                                         // and pass them via a ViewModel.
+                                Ordercount = data.OrderForId(client.Id); 
                             }
 
                             @if (Ordercount != null && Ordercount.Count > 0)

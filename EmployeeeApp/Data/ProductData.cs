@@ -215,19 +215,91 @@ namespace EmployeeeApp.Data
 
         }
 
-        public Orderlist GetOrder(int orderId)
+        //public Orderlist GetOrder(int orderId)
+        //{
+        //    try
+        //    {
+        //        using (SqlConnection connection = new SqlConnection(_connectionString))
+        //        {
+        //            connection.Open();
+
+        //            Orderlist orderlist = new Orderlist();
+        //            orderlist.order = new Order
+        //            {
+        //                OrderId = orderId,
+        //                OrderItems = new List<OrderItems>() 
+        //            };
+
+        //            using (SqlCommand command = new SqlCommand(
+        //                "SELECT C.Id AS ClientId, C.Name AS ClientName, O.OrderId, O.AddressId, O.TotalPrice AS OrderTotalPrice, " +
+        //                "CD.CityName, CD.StateName, CD.pincode, " +
+        //                "OI.OrderItemId, OI.ProductId, OI.TotalpricetoItem AS OrderItemUnitPrice, OI.Quantity, OI.TotalpricetoItem AS OrderItemTotalPrice " +
+        //                "FROM [Employee].[dbo].[Orders] AS O " +
+        //                "LEFT JOIN [Employee].[dbo].[Client] AS C ON O.ClientId = C.Id " +
+        //                "LEFT JOIN [Employee].[dbo].[ClientDetails] AS CD ON O.AddressId = CD.AddressId AND O.ClientId = CD.ClientId " +
+        //                "LEFT JOIN [Employee].[dbo].[OrderItems] AS OI ON O.OrderId = OI.OrderId " +
+        //                "WHERE O.OrderId = @OrderId " +
+        //                "ORDER BY O.OrderId DESC;", connection))
+        //            {
+        //                command.Parameters.AddWithValue("@OrderId", orderId);
+
+        //                using (SqlDataReader reader = command.ExecuteReader())
+        //                {
+        //                    while (reader.Read())
+        //                    {
+
+        //                        if (string.IsNullOrEmpty(orderlist.Name))
+        //                        {
+        //                            orderlist.Name = reader["ClientName"].ToString();
+        //                            orderlist.order.ClientId = Convert.ToInt32(reader["ClientId"]);
+        //                            orderlist.order.ClientName = reader["ClientName"].ToString();
+        //                            orderlist.order.AddressId = Convert.ToInt32(reader["AddressId"]);
+        //                            orderlist.order.AddressPlace = $"{reader["CityName"]}, {reader["StateName"]}, {reader["Pincode"]}";
+        //                            orderlist.order.TotalPrice = Convert.ToDecimal(reader["OrderTotalPrice"]);
+        //                        }
+
+
+        //                        if (!reader.IsDBNull(reader.GetOrdinal("OrderItemId")))
+        //                        {
+        //                            var item = new OrderItems
+        //                            {
+        //                                OrderItemId = Convert.ToInt32(reader["OrderItemId"]),
+        //                                OrderId = orderId,
+        //                                productId = Convert.ToInt32(reader["ProductId"]),
+        //                                Unitprice = Convert.ToDecimal(reader["OrderItemUnitPrice"]),
+        //                                quantity = Convert.ToInt32(reader["Quantity"]),
+        //                                TotalPrice = Convert.ToDecimal(reader["OrderItemTotalPrice"])
+        //                            };
+
+        //                            orderlist.order.OrderItems.Add(item);
+        //                        }
+        //                    }
+        //                }
+        //            }
+
+        //            return orderlist;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception("Cannot get the order details: " + ex.Message);
+        //    }
+        //}
+
+
+        public async Task<Orderlist> GetOrder(int orderId)
         {
             try
             {
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    connection.Open();
+                    await connection.OpenAsync(); // Use OpenAsync()
 
                     Orderlist orderlist = new Orderlist();
                     orderlist.order = new Order
                     {
                         OrderId = orderId,
-                        OrderItems = new List<OrderItems>() 
+                        OrderItems = new List<OrderItems>()
                     };
 
                     using (SqlCommand command = new SqlCommand(
@@ -243,11 +315,11 @@ namespace EmployeeeApp.Data
                     {
                         command.Parameters.AddWithValue("@OrderId", orderId);
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                     
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync()) 
                             {
-                                
                                 if (string.IsNullOrEmpty(orderlist.Name))
                                 {
                                     orderlist.Name = reader["ClientName"].ToString();
@@ -256,6 +328,7 @@ namespace EmployeeeApp.Data
                                     orderlist.order.AddressId = Convert.ToInt32(reader["AddressId"]);
                                     orderlist.order.AddressPlace = $"{reader["CityName"]}, {reader["StateName"]}, {reader["Pincode"]}";
                                     orderlist.order.TotalPrice = Convert.ToDecimal(reader["OrderTotalPrice"]);
+                                   
                                 }
 
                                
@@ -270,11 +343,15 @@ namespace EmployeeeApp.Data
                                         quantity = Convert.ToInt32(reader["Quantity"]),
                                         TotalPrice = Convert.ToDecimal(reader["OrderItemTotalPrice"])
                                     };
-
                                     orderlist.order.OrderItems.Add(item);
                                 }
                             }
                         }
+                    }
+                   
+                    if (string.IsNullOrEmpty(orderlist.Name) && !orderlist.order.OrderItems.Any())
+                    {
+                        return null; // Explicitly return null if no order data was found
                     }
 
                     return orderlist;
@@ -282,11 +359,11 @@ namespace EmployeeeApp.Data
             }
             catch (Exception ex)
             {
-                throw new Exception("Cannot get the order details: " + ex.Message);
+               
+                Console.WriteLine($"Error in GetOrder: {ex.Message}"); // For quick debugging
+                return null; 
             }
         }
-
-
 
 
         public bool InsertProduct(Product product)

@@ -14,9 +14,7 @@
         <a class="btn btn-outline-success btn-sm me-2" asp-action="Order" asp-route-id="@Model.First().ClientId">Add new Order</a>
      
 
-        <a class="btn btn-info btn-sm" asp-controller="Product" asp-action="ExportClientOrdersToExcel" asp-route-clientId="@ViewBag.ClientId">
-            <i class="bi bi-file-earmark-spreadsheet"></i> Export Orders
-        </a>
+      
        
     </div>
 
@@ -100,7 +98,8 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <a asp-action="PrintInvoice" asp-route-orderId="@order.OrderId" class="btn btn-outline-success" >Download Invoice</a>
+                            <a asp-action="Preview" asp-route-orderId="@order.OrderId" class="btn btn-outline-info" >View </a>
+                           
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
